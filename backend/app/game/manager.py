@@ -1,4 +1,6 @@
 from fastapi import WebSocket
+import json
+
 
 class ConnectionManager:
     def __init__(self):
@@ -15,7 +17,16 @@ class ConnectionManager:
         if room in self.rooms:
             self.rooms[room].remove(websocket)
             if not self.rooms[room]:
-                self.rooms.remove(room)
+                del self.rooms[room]
+    
+    async def broadcast(self, room: str, message: dict):
+        if room in self.rooms:
+            for connection in room:
+                await connection.send_json(message)
+
+manager = ConnectionManager()
+            
+
 
         
 
