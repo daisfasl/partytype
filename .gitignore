@@ -1,3 +1,2 @@
 # Backend stuff
-venv/
-env/
+.venv/
