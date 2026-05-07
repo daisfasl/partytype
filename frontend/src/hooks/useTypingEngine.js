@@ -1,7 +1,7 @@
 import { useState } from "react"
 
 function useTypingEngine() {
-    const [targetWords] = useState("the quick brown fox".split(" "))
+    const [targetWords] = useState("The quick brown fox jumps over the lazy dog".split(" "))
     const [currentWordIndex, setCurrentWordIndex] = useState(0)
     const [typedWord, setTypedWord] = useState("")
     const [completedWords, setCompletedWords] = useState([])
@@ -22,7 +22,7 @@ function useTypingEngine() {
                 setTypedWord(typedWord.slice(0, -1))
             }
         } else {
-            if (e.key.length === 1) {
+            if (e.key.length === 1 && typedWord.length < targetWords[currentWordIndex].length) {
                 setTypedWord(typedWord + e.key)
             }
         }

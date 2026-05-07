@@ -11,7 +11,7 @@ function App() {
         <div className="min-h-screen w-full bg-[#323437] flex items-center justify-center">
             <TypingDisplay targetWords={targetWords} currentWordIndex={currentWordIndex}
                 typedWord={typedWord} completedWords={completedWords} />
-            <input value={typedWord} onKeyDown={handleKeyDown} className="border border-white" />
+            <input value={typedWord} onKeyDown={handleKeyDown} className="opacity-0 absolute" />
 
         </div>
     )
