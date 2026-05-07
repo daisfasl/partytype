@@ -9,7 +9,7 @@ function App() {
 
     return (
         <div className="min-h-screen w-full bg-[#323437] flex items-center justify-center">
-            <input onKeyDown={handleKeyDown} className="border border-white" />
+            <input value={typedWord} onKeyDown={handleKeyDown} className="border border-white" />
         </div>
     )
 }
