@@ -18,6 +18,9 @@ async def websocket_endpoint(ws: WebSocket, room_id: str, player_id: str):
     try: 
         while True:
             data = await ws.receive_text()
+            payload = json.loads(data)
+            payload["player_id"] = player_id
+            await manager.broadcast(room_id, player_id)
 
     except WebSocketDisconnect:
         manager.disconnect(ws, room_id)
