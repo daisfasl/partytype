@@ -4,9 +4,38 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+
+}
+
+body {
+    overflow: hidden;
 }
 
 span {
     user-select: none;
     cursor: default;
+}
+
+.blinking-cursor {
+    animation: blink 1s step-end infinite;
+    color: grey;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+.correct {
+    color: #10b981;
+}
+
+.incorrect {
+    color: #ca4754;
+    text-decoration: underline;
+}
+
+.pending {
+    color: #646669;
 }

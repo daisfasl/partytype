@@ -1,12 +1,24 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 function useTypingEngine() {
-    const [targetWords] = useState("The quick brown fox jumps over the lazy dog".split(" "))
+    const [targetWords] = useState("The quick brown fox jumps over the lazy dog test some long text".split(" "))
     const [currentWordIndex, setCurrentWordIndex] = useState(0)
     const [typedWord, setTypedWord] = useState("")
     const [completedWords, setCompletedWords] = useState([])
+    const [startTime, setStartTime] = useState(null)
+    const [wpm, setWPM] = useState(0)
+
+    useEffect(() => {
+            if (startTime) {
+                const elapsedTime = (Date.now() - startTime) / 1000
+                const wordsPerMinute = (completedWords.length / elapsedTime) * 60
+                setWPM(wordsPerMinute)
+            }
+        }, [completedWords, startTime]
+    )
 
     function handleKeyDown(e) {
+        if (startTime === null) setStartTime(Date.now())
         if (e.key == " ") {
             e.preventDefault()
             setTypedWord("")
@@ -27,7 +39,7 @@ function useTypingEngine() {
             }
         }
     }
-    return { targetWords, currentWordIndex, typedWord, completedWords, handleKeyDown }
+    return { targetWords, currentWordIndex, typedWord, completedWords, handleKeyDown, wpm }
 }
 
 export default useTypingEngine
