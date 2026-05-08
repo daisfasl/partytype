@@ -1,30 +1,32 @@
 from fastapi import WebSocket
-import json
+import asyncio
 
 
 class ConnectionManager:
     def __init__(self):
-        self.rooms = dict()
+        self.rooms = dict() # all rooms currently running on the server
 
-    async def connect(self, websocket: WebSocket, room: str):
+    async def connect(self, websocket: WebSocket, room: str, player_id: str):
         await websocket.accept()
-        if room in self.rooms:
-            if self.rooms[room]["status"] != "waiting": # if not lobby is not waiting, closes websocket and terminates
-                websocket.close()
-                return
-            self.rooms[room]["websockets"].append(websocket)
-        else:
+        if room not in self.rooms:
             self.rooms[room] = { # holds all room info
                 "websockets" : [],
                 "status" : "waiting", # represents lobby states, one of: 
                                       # 1) waiting 2) completed 3) countdown 4) active
                 "text" : "The quick brown fox jumps over the lazy dog.", 
+                "players" : {}
             }
+        else:
+            if self.rooms[room]["status"] != "waiting": # if not lobby is not waiting, closes websocket and terminates
+                websocket.close()
+                return
             self.rooms[room]["websockets"].append(websocket)
+            self.rooms[room]["players"][player_id] = {"cursor" : 0, # current cursor pos.
+                                                      "wpm" : 0}
     
     def disconnect(self, websocket: WebSocket, room: str):
         if room in self.rooms:
-            self.rooms[room].remove(websocket)
+            self.rooms[room]["websockets"].remove(websocket)
             if not self.rooms[room]:
                 del self.rooms[room]
     
