@@ -9,13 +9,16 @@ function useTypingEngine() {
     const [wpm, setWPM] = useState(0)
 
     useEffect(() => {
-            if (startTime) {
-                const elapsedTime = (Date.now() - startTime) / 1000
-                const wordsPerMinute = (completedWords.length / elapsedTime) * 60
-                setWPM(wordsPerMinute)
-            }
-        }, [completedWords, startTime]
-    )
+        if (!startTime) return
+
+        const interval = setInterval(() => {
+            const elapsedMinutes = (Date.now() - startTime) / 60000
+            const wordsTyped = completedWords.length
+            setWPM(Math.round(wordsTyped / elapsedMinutes))
+        }, 500)
+
+        return () => clearInterval(interval)
+    }, [startTime, completedWords])
 
     function handleKeyDown(e) {
         if (startTime === null) setStartTime(Date.now())
