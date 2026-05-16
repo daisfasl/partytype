@@ -22,7 +22,7 @@ async def websocket_endpoint(ws: WebSocket, room_id: str, player_id: str):
             await manager.broadcast(room_id, payload)
 
     except WebSocketDisconnect:
-        manager.disconnect(ws, room_id)
+        manager.disconnect(ws, room_id, player_id)
         await manager.broadcast(room_id, {
             "message" : "Player {player_id} disconnected..."
         })

@@ -6,4 +6,8 @@ import json
 
 app = FastAPI()
 
+@app.get("/")
+async def root():
+    return {"message": "backend for party type :p"}
+
 app.include_router(router)

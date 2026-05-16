@@ -18,7 +18,7 @@ class ConnectionManager:
             }
         else:
             if self.rooms[room]["status"] != "waiting": # if not lobby is not waiting, closes websocket and terminates
-                websocket.close()
+                await websocket.close()
                 return
         self.rooms[room]["websockets"].append(websocket)
         self.rooms[room]["players"][player_id] = {"cursor" : 0, # player's current cursor pos.
@@ -33,7 +33,7 @@ class ConnectionManager:
     
     async def broadcast(self, room: str, message: dict):
         if room in self.rooms:
-            for connection in self.rooms[room]:
+            for connection in self.rooms[room]["websockets"]:
                 await connection.send_json(message)
 
 manager = ConnectionManager()
