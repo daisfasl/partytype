@@ -14,14 +14,18 @@ class ConnectionManager:
                 "status" : "waiting", # represents lobby states, one of: 
                                       # 1) waiting 2) completed 3) countdown 4) active
                 "text" : "The quick brown fox jumps over the lazy dog.", 
-                "players" : {}
+                "players" : {},
+                "host" : None
             }
         else:
             if self.rooms[room]["status"] != "waiting": # if not lobby is not waiting, closes websocket and terminates
                 await websocket.close()
                 return
+        self.rooms[room]["host"] = websocket
         self.rooms[room]["websockets"].append(websocket)
         self.rooms[room]["players"][player_id] = {"cursor" : 0, # player's current cursor pos.
+                                                  "is_bot" : False,
+                                         "completed_words" : 0,
                                                      "wpm" : 0}
     
     def disconnect(self, websocket: WebSocket, room: str, player_id: str):
