@@ -17,7 +17,8 @@ class RoomPayload(Payload):
     host: str
 
 class CountdownPayload(Payload):
-    pass 
+    type: Literal["countdown"]
+    value: Literal[3, 2, 1]
 
 class MessagePayload(Payload):
     type: Literal["message"]

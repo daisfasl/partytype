@@ -1,6 +1,6 @@
 from fastapi import WebSocket
 import asyncio
-from backend.app.schemas.payloads import *
+from app.schemas.payloads import *
 
 class ConnectionManager:
     def __init__(self):
