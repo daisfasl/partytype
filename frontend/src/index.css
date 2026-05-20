@@ -4,6 +4,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: ui-monospace, monospace;;
 
 }
 
@@ -17,8 +18,12 @@ span {
 }
 
 .blinking-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.2em;
+    background-color: white;
     animation: blink 1s step-end infinite;
-    color: grey;
+    vertical-align: text-bottom;
 }
 
 @keyframes blink {
@@ -28,7 +33,7 @@ span {
 }
 
 .correct {
-    color: #10b981;
+    color: #d1d0c5;
 }
 
 .incorrect {

@@ -13,8 +13,6 @@ function App() {
         inputRef.current.focus()
     }, [])
 
-    console.log({ currentWordIndex, typedWord, completedWords })
-
     return (
         <div onClick={() => inputRef.current.focus()} className="h-screen overflow-hidden w-full bg-[#323437] flex items-center justify-center">
             <div className="flex flex-col items-center gap-4 w-full">

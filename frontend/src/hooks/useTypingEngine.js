@@ -7,6 +7,7 @@ function useTypingEngine() {
     const [completedWords, setCompletedWords] = useState([])
     const [startTime, setStartTime] = useState(null)
     const [wpm, setWPM] = useState(0)
+    const [gameStatus, setGameStatus] = useState("waiting")
 
     useEffect(() => {
         if (!startTime) return
@@ -21,7 +22,10 @@ function useTypingEngine() {
     }, [startTime, completedWords])
 
     function handleKeyDown(e) {
-        if (startTime === null) setStartTime(Date.now())
+        if (startTime === null) {
+            setStartTime(Date.now())
+            setGameStatus("playing")
+        }
         if (e.key == " ") {
             e.preventDefault()
             setTypedWord("")
