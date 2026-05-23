@@ -22,7 +22,13 @@ function useTypingEngine() {
     }, [startTime, completedWords])
 
     function handleKeyDown(e) {
-        if (startTime === null) {
+        if (e.key === "Shift" || e.key === "CapsLock" || e.key === "Control" || e.key === "Alt" || e.key === "Meta") {
+            return;
+        }
+        
+        const isSystemShortcut = e.ctrlKey || e.metaKey || e.altKey;
+
+        if (startTime === null && !isSystemShortcut) {
             setStartTime(Date.now())
             setGameStatus("playing")
         }
@@ -46,7 +52,7 @@ function useTypingEngine() {
             }
         }
     }
-    return { targetWords, currentWordIndex, typedWord, completedWords, handleKeyDown, wpm }
+    return { targetWords, currentWordIndex, typedWord, completedWords, handleKeyDown, wpm, gameStatus }
 }
 
 export default useTypingEngine
