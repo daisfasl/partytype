@@ -22,14 +22,14 @@ function TextDisplay({ targetWords, currentWordIndex, typedWord, completedWords 
             {targetWords.map((word, wordIndex) => (
                 <span key={wordIndex}>
                     {word.split("").map((character, charIndex) => (
-                        <React.Fragment key={charIndex}>
+                        <>
                             {charIndex === typedWord.length && wordIndex === currentWordIndex && (
                                 <span className="blinking-cursor"></span>
                             )}
                             <span className={getCharClass(wordIndex, charIndex, character)}>
                                 {character}
                             </span>
-                        </React.Fragment>
+                        </>
                     ))}
                     {wordIndex === currentWordIndex && typedWord.length === word.length && (
                         <span className="blinking-cursor"></span>
