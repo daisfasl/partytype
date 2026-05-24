@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { IoPerson, IoPlay } from "react-icons/io5";
+import { IoPerson, IoPlay, IoSettingsSharp } from "react-icons/io5";
 import { FaKeyboard, FaInfoCircle } from 'react-icons/fa'
 
 function NavBar({gameStatus}) {
@@ -23,6 +23,9 @@ function NavBar({gameStatus}) {
                 </NavLink>
                 <NavLink to="/profile" className="hover:text-stone-300">
                     <IoPerson />
+                </NavLink>
+                 <NavLink to="/settings" className="hover:text-stone-300">
+                    <IoSettingsSharp />
                 </NavLink>
             </div>
         </nav>

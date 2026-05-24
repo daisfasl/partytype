@@ -24,7 +24,7 @@ function Practice() {
                 <WPMDisplay wpm={Math.round(wpm)} />
             </div>
             <input ref={inputRef} onKeyDown={handleKeyDown} className="opacity-0 absolute cursor-default" />
-            {console.log("gameStatus:", gameStatus, "typedWord.length:", typedWord.length)}
+            {console.log("typedWord:", typedWord)}
         </div>
     )
 }

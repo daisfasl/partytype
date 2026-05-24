@@ -22,22 +22,34 @@ function useTypingEngine() {
     }, [startTime, completedWords])
 
     function handleKeyDown(e) {
+        if (e.key === "Enter") {
+            setCurrentWordIndex(0)
+            setCompletedWords([])
+            setTypedWord("")
+            setStartTime(null)
+            setGameStatus("waiting")
+        }
         if (e.key === "Shift" || e.key === "CapsLock" || e.key === "Control" || e.key === "Alt" || e.key === "Meta") {
             return;
         }
-        
+
         const isSystemShortcut = e.ctrlKey || e.metaKey || e.altKey;
 
         if (startTime === null && !isSystemShortcut) {
             setStartTime(Date.now())
             setGameStatus("playing")
         }
-        if (e.key == " ") {
+        if (e.key === " ") {
             e.preventDefault()
-            setTypedWord("")
-            setCurrentWordIndex(currentWordIndex + 1)
+
+            if (typedWord.trim() === "") return
+
             setCompletedWords([...completedWords, typedWord])
-        } else if (e.key == "Backspace") {
+            setCurrentWordIndex(currentWordIndex + 1)
+            setTypedWord("")
+            return
+        }
+        if (e.key === "Backspace") {
             if (typedWord === "" && currentWordIndex === 0) return
             if (typedWord == "" && currentWordIndex > 0) {
                 setTypedWord(completedWords[completedWords.length - 1])
@@ -46,11 +58,11 @@ function useTypingEngine() {
             } else {
                 setTypedWord(typedWord.slice(0, -1))
             }
-        } else {
-            if (e.key.length === 1 && typedWord.length < targetWords[currentWordIndex].length) {
-                setTypedWord(typedWord + e.key)
-            }
         }
+        if (e.key.length === 1 && typedWord.length < 20) {
+            setTypedWord(typedWord + e.key)
+        }
+
     }
     return { targetWords, currentWordIndex, typedWord, completedWords, handleKeyDown, wpm, gameStatus }
 }
