@@ -7,7 +7,7 @@ import NavBar from '../components/NavBar'
 
 function Practice() {
     const inputRef = useRef(null)
-    const { targetWords, currentWordIndex, typedWord, completedWords, handleKeyDown, wpm, gameStatus} = useTypingEngine()
+    const { targetWords, currentWordIndex, typedWord, completedWords, handleKeyDown, wpm, gameStatus, reset } = useTypingEngine()
 
     useEffect(() => {
         inputRef.current.focus()
@@ -15,7 +15,7 @@ function Practice() {
 
     return (
         <div onClick={() => inputRef.current.focus()} className="h-screen overflow-hidden w-full bg-[#323437] flex flex-col">
-            <div className="flex-1 flex flex-col items-center justify-center gap-5">
+            <div className="flex-1 flex flex-col items-center justify-center gap-4">
                 <NavBar gameStatus={gameStatus} />
                 <TypingDisplay targetWords={targetWords} currentWordIndex={currentWordIndex}
                     typedWord={typedWord} completedWords={completedWords} />
@@ -25,6 +25,7 @@ function Practice() {
             </div>
             <input ref={inputRef} onKeyDown={handleKeyDown} className="opacity-0 absolute cursor-default" />
             {console.log("typedWord:", typedWord)}
+
         </div>
     )
 }

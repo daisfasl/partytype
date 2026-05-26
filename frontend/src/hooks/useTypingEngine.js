@@ -21,16 +21,22 @@ function useTypingEngine() {
         return () => clearInterval(interval)
     }, [startTime, completedWords])
 
+
+    function reset(){
+        setCurrentWordIndex(0)
+        setCompletedWords([])
+        setTypedWord("")
+        setStartTime(null)
+        setGameStatus("waiting")
+    }
+
     function handleKeyDown(e) {
         if (e.key === "Enter") {
-            setCurrentWordIndex(0)
-            setCompletedWords([])
-            setTypedWord("")
-            setStartTime(null)
-            setGameStatus("waiting")
+            e.preventDefault()
+            reset()
         }
         if (e.key === "Shift" || e.key === "CapsLock" || e.key === "Control" || e.key === "Alt" || e.key === "Meta") {
-            return;
+            return
         }
 
         const isSystemShortcut = e.ctrlKey || e.metaKey || e.altKey;
@@ -64,7 +70,7 @@ function useTypingEngine() {
         }
 
     }
-    return { targetWords, currentWordIndex, typedWord, completedWords, handleKeyDown, wpm, gameStatus }
+    return { targetWords, currentWordIndex, typedWord, completedWords, handleKeyDown, wpm, gameStatus, reset }
 }
 
 export default useTypingEngine
