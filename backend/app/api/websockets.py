@@ -14,6 +14,7 @@ async def websocket_endpoint(ws: WebSocket, room_id: str, player_id: str):
     await manager.broadcast(room_id, MessagePayload(type = "message", 
                                                     sender = "server", 
                                                     message = f"Player {player_id} has joined the party"))
+    await manager.handle_room_update(room_id)
 
     # listens for payloads from user
     try: 
@@ -26,9 +27,13 @@ async def websocket_endpoint(ws: WebSocket, room_id: str, player_id: str):
                 await ws.send_json({"message" : "error"})
                 return
             match payload: # call corresponding ConnectionManager func. to payload
-                case RoomPayload():
+                case StartPayload():
                     pass
                 case ProgressPayload():
+                    pass
+                case CountdownPayload():
+                    pass
+                case MessagePayload():
                     pass
 
     except WebSocketDisconnect:
