@@ -15,7 +15,7 @@ function Practice() {
 
     return (
         <div onClick={() => inputRef.current.focus()} className="h-screen overflow-hidden w-full bg-[#323437] flex flex-col">
-            <div className="flex-1 flex flex-col items-center justify-center gap-4">
+            <div className="flex-1 flex flex-col items-center justify-center gap-5">
                 <NavBar gameStatus={gameStatus} />
                 <TypingDisplay targetWords={targetWords} currentWordIndex={currentWordIndex}
                     typedWord={typedWord} completedWords={completedWords} />

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 
 function useTypingEngine() {
-    const [targetWords] = useState("The quick brown fox jumps over the lazy dog test some long text".split(" "))
+    const [targetWords] = useState("The quick brown fox jumps over the lazy dog test some long text test test test test test test test".split(" "))
     const [currentWordIndex, setCurrentWordIndex] = useState(0)
     const [typedWord, setTypedWord] = useState("")
     const [completedWords, setCompletedWords] = useState([])

@@ -10,8 +10,8 @@ function NavBar({gameStatus}) {
 }`;
     return (
         <nav className={activeClass}>
-            <NavLink to="/" className="gap-4 text-lg text-white font-bold">partyType</NavLink>
-            <div className="flex gap-4 text-gray-400 text-xl">
+            <NavLink to="/" className="gap-4 text-2xl text-white font-bold">partyType</NavLink>
+            <div className="flex gap-4 text-gray-400 text-2xl">
                 <NavLink to="/play" className="hover:text-stone-300">
                     <IoPlay />
                 </NavLink>
