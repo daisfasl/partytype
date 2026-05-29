@@ -21,8 +21,9 @@ async def websocket_endpoint(ws: WebSocket, room_id: str, player_id: str):
         while True:
             data = await ws.receive_text()
             payload = json.loads(data) # parse json
+            type_adapter = TypeAdapter(Payload)
             try:
-                payload = Payload.model_validate(payload) # checks if payload is valid (pydantic)
+                payload = type_adapter.validate_python(payload)
             except ValidationError as error:
                 await ws.send_json({"message" : "error"})
                 return
