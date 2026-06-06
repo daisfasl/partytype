@@ -1,8 +1,7 @@
 from fastapi import WebSocket
 import asyncio
-from backend.app.schemas.payloads import *
+from app.schemas.payloads import *
 from typing import cast
-from backend.app.game.engine import *
 
 class ConnectionManager:
     def __init__(self):
@@ -47,8 +46,9 @@ class ConnectionManager:
                 await connection.send_json(payload.model_dump_json())
     
     # handles incoming progress from players
-    async def handle_progress(self):
+    async def handle_progress(self, room: str, payload: ProgressPayload):
         pass
+        
          
     
     # handles host starting the game
@@ -56,6 +56,7 @@ class ConnectionManager:
         if payload.type == self.rooms[room]["host"]:
             self.rooms[room]["status"] = "countdown"
             await self.handle_room_update(room)
+        from app.game.engine import run_game
         await run_game(room, self.rooms[room]["time_setting"])
             
             

@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
-from backend.app.main import app
-from backend.app.schemas.payloads import *
+from app.main import app
+from app.schemas.payloads import *
 from pydantic import TypeAdapter
 import pytest
 import json
@@ -22,4 +22,5 @@ def test_payloads():
            pass
        case _:
            pytest.fail()
+
         
