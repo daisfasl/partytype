@@ -1,11 +1,16 @@
-import {Box, Text} from 'ink';
-import Header from '../src/components/Header.js';
+import { useState } from 'react';
+import Home from './screens/Home.js';
+import Practice from './screens/Practice.js';
+
 
 export default function App() {
-	return (
-		<Box flexDirection="column" paddingX={2} paddingY={1}>
-			<Header />
-			<Text>This is a test</Text>
-		</Box>
-	);
-}
+	const [currentScreen, setScreen] = useState('home');
+
+
+	if (currentScreen === 'home') {
+		return (<Home />)
+	} else if (currentScreen == 'practice') {
+		return (<Practice />)
+	}
+} 
+
