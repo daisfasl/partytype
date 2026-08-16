@@ -4,24 +4,34 @@ from typing_extensions import Annotated
 
 # refer here for BaseModel types/json formatting
 
-# progress sent from players to server
-class ProgressPayload(BaseModel):
-    type: Literal["progress"]
-    player_id: str
-    cursor: int
-    completed_words: int 
-    wpm: float
-
-class StartPayload(BaseModel):
-    type: Literal["start"]
-    player_id: str
-
 # player information
 class Player(TypedDict):
     cursor: int
     completed_words: int
     wpm: float
-# room information sent from server to user
+
+# ------------------------- 
+# ------------------------- Players -> Server
+# ------------------------- 
+class ProgressPayload(BaseModel):
+    type: Literal["progress"]
+    player_id: str
+    cursor: int
+    completed_words: int 
+
+class StartPayload(BaseModel):
+    type: Literal["start"]
+    player_id: str
+
+class FinishPayload(BaseModel):
+    type: Literal["finish"]
+    player_id: str
+
+# ------------------------- 
+# ------------------------- Server -> Players
+# ------------------------- 
+
+
 class RoomPayload(BaseModel):
     type: Literal["room"]
     mode: Literal["time", "words", "quote"]
@@ -36,16 +46,28 @@ class CountdownPayload(BaseModel):
     type: Literal["countdown"]
     value: int = Field(ge = 1, le = 3) # int 1, 2, or 3
 
+class GameEndPayload(BaseModel):
+    type: Literal["end"]
+    
+
+# ------------------------- 
+# ------------------------- Server <-> Players (Bidirectional)
+# ------------------------- 
+
 class MessagePayload(BaseModel):
     type: Literal["message"]
     sender: Literal["user", "server"]
     message: str
 
-# BaseModel union type 
+
+# BaseModel union type
 Payload = Annotated[Union[ProgressPayload, 
                           StartPayload,
                           RoomPayload,
                           CountdownPayload,
-                          MessagePayload],
+                          MessagePayload,
+                          GameEndPayload,
+                          ],
                 Field(discriminator= 'type')] ## tells pydantic to look at 'type'
                                               ## to differentiate between payloads
+
