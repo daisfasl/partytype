@@ -14,7 +14,7 @@ export default function App() {
 	if (currentScreen === 'home') {
 		return (<Home onNavigate = {navigateTo} />)
 	} else if (currentScreen === 'practice') {
-		return (<Practice />)
+		return (<Practice onNavigate = {navigateTo} />)
 	}
 } 
 

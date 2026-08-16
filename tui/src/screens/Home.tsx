@@ -17,7 +17,7 @@ export default function Home({ onNavigate }: HomeProps) {
         >
             <Box flexDirection='column' borderStyle='round' width={60} paddingX={1} >
                 <DashboardHeader />
-                <Menu />
+                <Menu onNavigate={onNavigate} />
                 <DashboardFooter />
             </Box>
         </Box>

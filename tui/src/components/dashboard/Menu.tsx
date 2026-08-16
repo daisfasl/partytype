@@ -1,6 +1,28 @@
 import { Box, Text, useInput } from 'ink';
+import { useState } from 'react';
 
-export default function Menu() {
+interface MenuProps {
+    onNavigate: (screen: 'home' | 'practice') => void;
+}
+
+export default function Menu({ onNavigate }: MenuProps) {
+
+    const [currMenu, setMenu] = useState(0);
+    const menuOptions = ["Practice", "Create a party", "Join a party", "Settings"]
+
+    useInput((input, key) => {
+        if (key.upArrow) {
+            if (currMenu > 0) {
+                setMenu(currMenu - 1);
+            }
+        }
+        if (key.downArrow) {
+            if (currMenu < menuOptions.length - 1) {
+                setMenu(currMenu + 1);
+            }
+        }
+    });
+
     return (
         <Box flexDirection='column'>
             {/* Welcome Message */}
@@ -11,10 +33,8 @@ export default function Menu() {
 
             {/* Menu Options */}
             <Box marginTop={1} flexDirection='column'>
-                <Text>{'›'} Practice</Text>
-                <Text>{' '}Create a party</Text>
-                <Text>{' '}Join a party</Text>
-                <Text>{' '}Settings</Text>
+                {menuOptions.map((menuOption, index) =>
+                    ((index === currMenu) ? <Text>{'› '}{menuOption} </Text> : <Text>{menuOption}</Text>))}
             </Box>
         </Box>
     );
