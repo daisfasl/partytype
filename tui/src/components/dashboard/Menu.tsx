@@ -1,17 +1,18 @@
 import { Box, Text, useInput } from "ink";
 import { useState } from "react";
+import { Screen } from "../../types.js";
 
 interface MenuProps {
-  onNavigate: (screen: "home" | "practice") => void;
+  onNavigate: (screen: Screen) => void;
 }
 
 export default function Menu({ onNavigate }: MenuProps) {
   const [currMenu, setMenu] = useState(0);
-  const menuOptions = [
-    "Practice",
-    "Create a party",
-    "Join a party",
-    "Settings",
+  const menuOptions: { label: string; screen: Screen }[] = [
+    { label: "Practice Mode", screen: "practice" },
+    { label: "Create a Party", screen: "create-party" },
+    { label: "Join a Party", screen: "join-party" },
+    { label: "Settings", screen: "settings" },
   ];
 
   useInput((input, key) => {
@@ -25,10 +26,10 @@ export default function Menu({ onNavigate }: MenuProps) {
         setMenu(currMenu + 1);
       }
     }
-
     if (key.return) {
-      if (currMenu === 0) {
-        onNavigate("practice");
+      const selectedItem = menuOptions[currMenu];
+      if (selectedItem) {
+        onNavigate(selectedItem.screen);
       }
     }
   });
@@ -43,16 +44,15 @@ export default function Menu({ onNavigate }: MenuProps) {
 
       {/* Menu Options */}
       <Box marginTop={1} flexDirection="column">
-        {menuOptions.map((menuOption, index) =>
-          index === currMenu ? (
-            <Text key={menuOption}>
-              {"› "}
-              {menuOption}{" "}
+        {menuOptions.map((menuOption, index) => {
+          const isSelected = index === currMenu;
+          return (
+            <Text key={menuOption.screen} color={isSelected ? "white" : "gray"}>
+              {isSelected ? "› " : ""}
+              {menuOption.label}
             </Text>
-          ) : (
-            <Text key={menuOption}>{menuOption}</Text>
-          ),
-        )}
+          );
+        })}
       </Box>
     </Box>
   );
