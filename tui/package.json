@@ -1,0 +1,27 @@
+{
+  "name": "tui",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx watch src/cli.tsx",
+    "start": "tsx src/cli.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "ink": "^7.1.1",
+    "ink-big-text": "^2.0.0",
+    "ink-gradient": "^4.0.1",
+    "react": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2"
+  }
+}
