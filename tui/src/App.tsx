@@ -1,11 +1,10 @@
 import { useState } from "react";
 import Home from "./screens/Home.js";
 import Practice from "./screens/Practice.js";
-
-type Screen = "home" | "practice";
+import { Screen } from "./types.js";
 
 export default function App() {
-  const [currentScreen, setScreen] = useState<Screen>("home");
+  const [currentScreen, setScreen] = useState<Screen>("practice");
 
   function navigateTo(screen: Screen) {
     setScreen(screen);
