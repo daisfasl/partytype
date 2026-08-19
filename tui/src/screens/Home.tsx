@@ -1,7 +1,7 @@
-import { Box } from "ink";
+import { Box, Text } from "ink";
 import Header from "../components/Header.js";
 import DashboardFooter from "../components/dashboard/DashboardFooter.js";
-import Menu from "../components/dashboard/Menu.js";
+import Menu from "../components/Menu.js";
 import { Screen } from "../types.js";
 
 interface HomeProps {
@@ -9,11 +9,23 @@ interface HomeProps {
 }
 
 export default function Home({ onNavigate }: HomeProps) {
+  const menuOptions: { label: string; onSelect: () => void }[] = [
+    { label: "Practice Mode", onSelect: () => onNavigate("practice") },
+    { label: "Create a Party", onSelect: () => onNavigate("create-party") },
+    { label: "Join a Party", onSelect: () => onNavigate("join-party") },
+    { label: "Settings", onSelect: () => onNavigate("settings") },
+  ];
+
   return (
     <Box width="100%" height="100%" alignItems="center" justifyContent="center">
       <Box flexDirection="column" borderStyle="round" width={60} paddingX={1}>
         <Header subtitle="version 0.1" />
-        <Menu onNavigate={onNavigate} />
+        {/* Welcome Message */}
+        <Box flexDirection="column" marginTop={1}>
+          <Text>Welcome.</Text>
+          <Text>How would you like to type?</Text>
+        </Box>
+        <Menu direction="column" options={menuOptions} />
         <DashboardFooter />
       </Box>
     </Box>

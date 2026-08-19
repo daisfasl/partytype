@@ -15,7 +15,7 @@ export default function DashboardFooter() {
     >
       <Text color="red">offline</Text>
       {/* online when connected to API */}
-      <Text dimColor>↑↓ select · enter open · q quit</Text>
+      <Text dimColor>[↑↓] select · [enter] open · [q] quit</Text>
     </Box>
   );
 }

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx src/cli.tsx",
+    "dev": "tsx watch src/cli.tsx",
     "start": "tsx src/cli.tsx",
     "typecheck": "tsc --noEmit"
   },
