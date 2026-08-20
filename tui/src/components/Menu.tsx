@@ -53,7 +53,7 @@ export default function Menu({ options, direction = "column" }: MenuProps) {
         const isSelected = index === currMenu;
         return (
           <Text key={menuOption.label} color={isSelected ? "white" : "gray"}>
-            {isSelected ? "› " : ""}
+            {isSelected ? "› " : "  "}
             {menuOption.label}
           </Text>
         );

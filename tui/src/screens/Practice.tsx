@@ -11,10 +11,11 @@ interface PracticeProps {
 }
 
 export default function Practice({ onNavigate }: PracticeProps) {
-  const mockPrompt = "The quick brown fox jumps over the lazy dog.";
-  const { status, typed } = useTypingEngine(mockPrompt);
+  const mockPrompt =
+    "The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.";
+  const { status, typed, restart } = useTypingEngine(mockPrompt);
   const menuOptions: { label: string; onSelect: () => void }[] = [
-    { label: "Restart ↻", onSelect: () => {} },
+    { label: "Restart ↻", onSelect: () => restart() },
     { label: "Settings ⚙", onSelect: () => {} },
     { label: "Exit [Esc]", onSelect: () => onNavigate("home") },
   ];
@@ -31,35 +32,35 @@ export default function Practice({ onNavigate }: PracticeProps) {
       <Header subtitle="Practice Mode" />
 
       {/* Typing Text Box */}
-      <Box
-        padding={1}
-        borderTop={true}
-        borderBottom={true}
-        borderLeft={false}
-        borderRight={false}
-        borderColor="gray"
-        borderStyle="single"
-      >
-        {mockPrompt.split("").map((char, index) => {
-          const isCurrent = index === typed.length;
-          const isTyped = index < typed.length;
-          const isCorrect = isTyped && typed[index] == char;
-          const isIncorrect = isTyped && typed[index] != char;
-          return (
-            <Text
-              key={index}
-              color={isCorrect ? "green" : isIncorrect ? "red" : undefined}
-              inverse={isCurrent}
-              dimColor={!isTyped && !isCurrent}
-            >
-              {char}
-            </Text>
-          );
-        })}
+      <Box width={60} alignSelf="center" paddingY={1}>
+        <Text>
+          {mockPrompt.split("").map((char, index) => {
+            const isCurrent = index === typed.length;
+            const isTyped = index < typed.length;
+            const isCorrect = isTyped && typed[index] == char;
+            const isIncorrect = isTyped && typed[index] != char;
+            return (
+              <Text
+                key={index}
+                color={
+                  isCorrect ? "#a6e3a1" : isIncorrect ? "#f38ba8" : undefined
+                }
+                inverse={isCurrent}
+                dimColor={!isTyped && !isCurrent}
+              >
+                {char}
+              </Text>
+            );
+          })}
+        </Text>
       </Box>
 
       {/* Footer Controls */}
-      {status != "typing" && <Menu direction="row" options={menuOptions} />}
+      {status !== "typing" && (
+        <Box width={60} alignSelf="center" justifyContent="center">
+          <Menu direction="row" options={menuOptions} />
+        </Box>
+      )}
     </Box>
   );
 }

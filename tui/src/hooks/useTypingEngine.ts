@@ -5,11 +5,20 @@ import { useInput } from "ink";
 export default function useTypingEngine(text: string) {
   const [status, setStatus] = useState<Status>("idle");
   const [typed, setTyped] = useState<string>("");
+  const restart = () => {
+    setTyped("");
+    setStatus("idle");
+  };
 
   useInput((input, key) => {
     if (status === "completed") return;
+
     if (key.tab || key.escape) {
       setStatus("idle");
+      return;
+    }
+
+    if (key.return) {
       return;
     }
 
@@ -34,5 +43,5 @@ export default function useTypingEngine(text: string) {
     }
   });
 
-  return { status, typed };
+  return { status, typed, restart };
 }
