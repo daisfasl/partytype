@@ -1,8 +1,6 @@
-import { Box, Text, useInput } from "ink";
+import { Box, Text, useInput, useStdout } from "ink";
 import Header from "../components/Header.js";
 import type { Screen } from "../types.js";
-import { useState } from "react";
-import { Status } from "../types.js";
 import Menu from "../components/Menu.js";
 import useTypingEngine from "../hooks/useTypingEngine.js";
 
@@ -11,6 +9,8 @@ interface PracticeProps {
 }
 
 export default function Practice({ onNavigate }: PracticeProps) {
+  const { stdout } = useStdout();
+  const terminalHeight = stdout.rows;
   const mockPrompt =
     "The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.";
   const { status, typed, restart } = useTypingEngine(mockPrompt);
@@ -27,40 +27,42 @@ export default function Practice({ onNavigate }: PracticeProps) {
   });
 
   return (
-    <Box flexDirection="column" padding={1}>
+    <Box flexDirection="column" padding={1} height={terminalHeight}>
       {/* Header */}
       <Header subtitle="Practice Mode" />
 
-      {/* Typing Text Box */}
-      <Box width={60} alignSelf="center" paddingY={1}>
-        <Text>
-          {mockPrompt.split("").map((char, index) => {
-            const isCurrent = index === typed.length;
-            const isTyped = index < typed.length;
-            const isCorrect = isTyped && typed[index] == char;
-            const isIncorrect = isTyped && typed[index] != char;
-            return (
-              <Text
-                key={index}
-                color={
-                  isCorrect ? "#a6e3a1" : isIncorrect ? "#f38ba8" : undefined
-                }
-                inverse={isCurrent}
-                dimColor={!isTyped && !isCurrent}
-              >
-                {char}
-              </Text>
-            );
-          })}
-        </Text>
-      </Box>
-
-      {/* Footer Controls */}
-      {status !== "typing" && (
-        <Box width={60} alignSelf="center" justifyContent="center">
-          <Menu direction="row" options={menuOptions} />
+      <Box flexGrow={1} flexDirection="column" justifyContent="center">
+        {/* Typing Text Box */}
+        <Box width={60} alignSelf="center" paddingY={1}>
+          <Text>
+            {mockPrompt.split("").map((char, index) => {
+              const isCurrent = index === typed.length;
+              const isTyped = index < typed.length;
+              const isCorrect = isTyped && typed[index] == char;
+              const isIncorrect = isTyped && typed[index] != char;
+              return (
+                <Text
+                  key={index}
+                  color={
+                    isCorrect ? "#a6e3a1" : isIncorrect ? "#f38ba8" : undefined
+                  }
+                  inverse={isCurrent}
+                  dimColor={!isTyped && !isCurrent}
+                >
+                  {char}
+                </Text>
+              );
+            })}
+          </Text>
         </Box>
-      )}
+
+        {/* Footer Controls */}
+        {status !== "typing" && (
+          <Box width={60} alignSelf="center" justifyContent="center">
+            <Menu direction="row" options={menuOptions} />
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 }
