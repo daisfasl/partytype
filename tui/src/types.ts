@@ -4,3 +4,5 @@ export type Screen =
   | "create-party"
   | "join-party"
   | "settings";
+
+export type Status = "idle" | "typing" | "completed";
