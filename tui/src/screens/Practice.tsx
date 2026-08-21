@@ -12,8 +12,8 @@ export default function Practice({ onNavigate }: PracticeProps) {
   const { stdout } = useStdout();
   const terminalHeight = stdout.rows;
   const mockPrompt =
-    "The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.";
-  const { status, typed, restart } = useTypingEngine(mockPrompt);
+    "The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.";
+  const { status, typed, restart, wpm, accuracy } = useTypingEngine(mockPrompt);
   const menuOptions: { label: string; onSelect: () => void }[] = [
     { label: "Restart ↻", onSelect: () => restart() },
     { label: "Settings ⚙", onSelect: () => {} },
@@ -33,7 +33,7 @@ export default function Practice({ onNavigate }: PracticeProps) {
 
       <Box flexGrow={1} flexDirection="column" justifyContent="center">
         {/* Typing Text Box */}
-        <Box width={60} alignSelf="center" paddingY={1}>
+        <Box width={60} alignSelf="center">
           <Text>
             {mockPrompt.split("").map((char, index) => {
               const isCurrent = index === typed.length;
@@ -55,6 +55,14 @@ export default function Practice({ onNavigate }: PracticeProps) {
             })}
           </Text>
         </Box>
+
+        {/* Statistics */}
+        {status === "completed" && (
+          <Box alignSelf="center" justifyContent="center" marginTop={1}>
+            <Text>wpm: {wpm}</Text>
+            <Text> accuracy: {accuracy}%</Text>
+          </Box>
+        )}
 
         {/* Footer Controls */}
         {status !== "typing" && (
