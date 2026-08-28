@@ -4,37 +4,58 @@ from app.schemas.payloads import *
 from typing import cast
 import time
 
+import random
+import string
+
 class ConnectionManager:
     def __init__(self):
         self.rooms = dict() # all rooms currently running on the server
 
-    async def connect(self, websocket: WebSocket, room: str, player_id: str) -> None:
-        await websocket.accept()
-        if room not in self.rooms:
-            self.rooms[room] = { # holds all room info
-                "websockets" : [],
-                "mode" : "time", # represents lobby gamemode one of:
-                                 # 1) time 2) words 3) quote
-                "status" : "waiting", # represents lobby states, one of: 
-                                      # 1) waiting 2) countdown 3) active
-                "text" : "The quick brown fox jumps over the lazy dog.", 
-                "time_setting" : 60, # selected time setting, int
-                "time_remaining" : 60, # time remaining in the match, float
-                "players" : {},
-                "host" : player_id,
-                "start_time": None,
-            }
-        else:
-            if self.rooms[room]["status"] != "waiting": # if not lobby is not waiting, closes websocket and terminates
-                await websocket.close()
-                return
+    def create_new_room(self, websocket: WebSocket, room: str, player_id: str) -> None:
+        self.rooms[room] = { # holds all room info
+            "websockets" : [],
+            "mode" : "time", # represents lobby gamemode one of:
+                             # 1) time 2) words 3) quote
+            "status" : "waiting", # represents lobby states, one of: 
+                                  # 1) waiting 2) countdown 3) active
+            "text" : "The quick brown fox jumps over the lazy dog.", 
+            "time_setting" : 60, # selected time setting, int
+            "time_remaining" : 60, # time remaining in the match, float
+            "players" : {},
+            "host" : player_id,
+            "start_time": None,
+        }
         self.rooms[room]["websockets"].append(websocket)
         self.rooms[room]["players"][player_id] = {"cursor" : 0, # player's current character position (ignoring errors)
                                          "completed_words" : 0,
                                                      "wpm" : 0}
-    async def create_room(self, websocket: WebSocket, player_id: str) -> None:
-        await websocket.accept():
-            
+
+    async def connect(self, websocket: WebSocket, room: str, player_id: str) -> None | ErrorPayload: # return error payload if unable to join
+        await websocket.accept()
+        if room not in self.rooms:
+            return ErrorPayload(type="error",
+                                message="Party ID not found...")
+        else:
+            if self.rooms[room]["status"] != "waiting": # if not lobby is not waiting, closes websocket and terminates
+                return ErrorPayload(type="error",
+                                    message="Game still in progress...")
+        if player_id in self.rooms[room]:
+            return ErrorPayload(type="error",
+                                message="Chosen player ID already in party, please pick a new one!")
+        self.rooms[room]["websockets"].append(websocket)
+        self.rooms[room]["players"][player_id] = {"cursor" : 0, # player's current character position (ignoring errors)
+                                         "completed_words" : 0,
+                                                     "wpm" : 0}
+
+    async def create_party(self, websocket: WebSocket, player_id: str) -> str: # returns the new room id
+        await websocket.accept()
+
+        while True:
+            room = "".join(random.choices(string.ascii_uppercase, k=6))
+            if room not in self.rooms:
+                break
+        self.create_new_room(websocket, room, player_id)
+        return room
     
     async def disconnect(self, websocket: WebSocket, room: str, player_id: str) -> None:
         if room in self.rooms:
@@ -47,8 +68,8 @@ class ConnectionManager:
                                      MessagePayload(type= "message",
                                                     sender="server",
                                                     message=f"{player_id} has left the party :("))
-                await self.handle_room_update(room)
                 self.rooms[room]["host"] = next(iter(self.rooms[room]["players"])) # else, promote first joined player to host
+                await self.handle_room_update(room)
 
     async def broadcast(self, room: str, payload: Payload) -> None:
         if room in self.rooms:
@@ -56,26 +77,26 @@ class ConnectionManager:
                 await connection.send_json(payload.model_dump_json())
     
     # handles incoming progress from players
-    async def handle_progress(self, room: str, payload: ProgressPayload):
+    async def handle_progress(self, room: str, payload: ProgressPayload, player_id: str):
         if room in self.rooms:
-            id = payload.player_id
-            self.rooms[room]["players"][id]["cursor"] = payload.cursor
-            self.rooms[room]["players"][id]["completed_words"] = payload.completed_words
+            self.rooms[room]["players"][player_id]["cursor"] = payload.cursor
+            self.rooms[room]["players"][player_id]["completed_words"] = payload.completed_words
 
             # calc. wpm
             start_time = self.rooms[room]["start_time"]
-            self.rooms[room]["players"][id]["wpm"] = (payload.cursor / 5) // (start_time - time.perf_counter())
+            self.rooms[room]["players"][player_id]["wpm"] = (payload.cursor / 5) // (start_time - time.perf_counter())
 
             await self.handle_room_update(room)
 
 
     # handles host starting the game
-    async def handle_host_start(self, room: str, payload: StartPayload):
-        if payload.player_id == self.rooms[room]["host"]:
-            self.rooms[room]["status"] = "countdown"
-            await self.handle_room_update(room)
-            from app.game.engine import run_game
-            await run_game(room, self.rooms[room]["time_setting"])
+    async def handle_host_start(self, room: str, payload: StartPayload, player_id: str):
+        if room in self.rooms:
+            if player_id == self.rooms[room]["host"] and self.rooms[room]["status"] == "waiting":
+                self.rooms[room]["status"] = "countdown"
+                await self.handle_room_update(room)
+                from app.game.engine import run_game
+                await run_game(room, self.rooms[room]["time_setting"])
             
         
 
@@ -86,7 +107,7 @@ class ConnectionManager:
                 self.rooms[room]["status"] = "waiting"
                 await self.broadcast(room, GameEndPayload(type = "end",
                                                           winner = player_id))
-
+                await manager.handle_room_update(room)
             
 
     # sends an payload of curr. room state to user
@@ -99,6 +120,10 @@ class ConnectionManager:
                                                text = self.rooms[room]["text"],
                                                players = self.rooms[room]["players"],
                                                host = self.rooms[room]["host"]))
+
+    async def host_change_settings(self, room: str, player_id):
+       if room in self.rooms:
+           pass
     
     def set_start_time(self, room: str, start_time):
         if room in self.rooms:

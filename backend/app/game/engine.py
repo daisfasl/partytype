@@ -18,7 +18,6 @@ async def run_game(room: str, time_setting: int):
     await asyncio.sleep(time_setting)
     if room in manager.rooms and manager.rooms[room]["status"] == "active": 
         # if active, select winner and end game
-        max_wpm_player_id = None
         for player in manager.rooms[room]["players"]:
             if player[]
         manager.rooms[room]["status"] = "waiting"  

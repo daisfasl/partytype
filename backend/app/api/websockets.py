@@ -27,9 +27,9 @@ async def game_loop(ws: WebSocket, player_id: str, room_id: str):
                 await ws.send_json(error_msg.model_dump_json())
             match payload: # call corresponding ConnectionManager func. to payload
                 case StartPayload():
-                    asyncio.create_task(manager.handle_host_start(room_id, payload))
+                    asyncio.create_task(manager.handle_host_start(room_id, payload,player_id))
                 case ProgressPayload():
-                    await manager.handle_progress(room_id, payload)
+                    await manager.handle_progress(room_id, payload,player_id)
                 case MessagePayload():
                     await manager.broadcast(room_id, payload)
                 case FinishPayload():
