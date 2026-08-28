@@ -2,6 +2,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from app.game.manager import manager    
 from pydantic import ValidationError, TypeAdapter
 from app.schemas.payloads import *
+import asyncio
 import json
 
 websockets_router = APIRouter()
@@ -24,12 +25,11 @@ async def websocket_endpoint(ws: WebSocket, room_id: str, player_id: str):
             type_adapter = TypeAdapter(Payload)
             try:
                 payload = type_adapter.validate_python(payload)
-            except ValidationError as error:
-                await ws.send_json({"message" : "error"})
-                return
+            except ValidationError:
+                pass # continue looping :p
             match payload: # call corresponding ConnectionManager func. to payload
                 case StartPayload():
-                    await manager.handle_host_start(room_id, payload)
+                    asyncio.create_task(manager.handle_host_start(room_id, payload))
                 case ProgressPayload():
                     await manager.handle_progress(room_id, payload)
                 case MessagePayload():
@@ -37,10 +37,6 @@ async def websocket_endpoint(ws: WebSocket, room_id: str, player_id: str):
                 case FinishPayload():
                     pass
     except WebSocketDisconnect:
-        manager.disconnect(ws, room_id, player_id)
-        await manager.broadcast(room_id, MessagePayload(type = "message", 
-                                                    sender = "server",
-                                                    message = f"Player {player_id} has disconnected..."))
-
+        await manager.disconnect(ws, room_id, player_id)
 
     

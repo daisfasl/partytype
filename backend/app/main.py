@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi import WebSocket, WebSocketDisconnect
 from app.game.manager import manager 
-from app.api.websockets import router
+from app.api.websockets import websockets_router
 import json
 
 app = FastAPI()
@@ -10,4 +10,4 @@ app = FastAPI()
 async def root():
     return {"message": "backend for party type :p"}
 
-app.include_router(router)
+app.include_router(websockets_router)

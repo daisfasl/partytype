@@ -48,6 +48,7 @@ class CountdownPayload(BaseModel):
 
 class GameEndPayload(BaseModel):
     type: Literal["end"]
+    winner: str
     
 
 # ------------------------- 

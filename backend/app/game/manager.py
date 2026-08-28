@@ -32,14 +32,22 @@ class ConnectionManager:
         self.rooms[room]["players"][player_id] = {"cursor" : 0, # player's current character position (ignoring errors)
                                          "completed_words" : 0,
                                                      "wpm" : 0}
+    async def create_room(self, websocket: WebSocket, player_id: str) -> None:
+        await websocket.accept():
+            
     
-    def disconnect(self, websocket: WebSocket, room: str, player_id: str) -> None:
+    async def disconnect(self, websocket: WebSocket, room: str, player_id: str) -> None:
         if room in self.rooms:
             self.rooms[room]["websockets"].remove(websocket)
             del self.rooms[room]["players"][player_id]
             if self.rooms[room]["websockets"] == []: # if no more players in the room, deletes the room
                 del self.rooms[room]
             else:
+                await self.broadcast(room,
+                                     MessagePayload(type= "message",
+                                                    sender="server",
+                                                    message=f"{player_id} has left the party :("))
+                await self.handle_room_update(room)
                 self.rooms[room]["host"] = next(iter(self.rooms[room]["players"])) # else, promote first joined player to host
 
     async def broadcast(self, room: str, payload: Payload) -> None:
@@ -52,11 +60,11 @@ class ConnectionManager:
         if room in self.rooms:
             id = payload.player_id
             self.rooms[room]["players"][id]["cursor"] = payload.cursor
-            self.rooms[room]["players"][id] = payload.completed_words
+            self.rooms[room]["players"][id]["completed_words"] = payload.completed_words
 
             # calc. wpm
             start_time = self.rooms[room]["start_time"]
-            self.rooms[room]["players"][id] = (payload.cursor / 5) // (start_time - time.perf_counter())
+            self.rooms[room]["players"][id]["wpm"] = (payload.cursor / 5) // (start_time - time.perf_counter())
 
             await self.handle_room_update(room)
 
