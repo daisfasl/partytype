@@ -24,7 +24,7 @@ def get_words(dataset_file: str):
         
     words = data["words"]
     
-    return {"word": [random.choice(words) for _ in range(50)]}
+    return {"words": [random.choice(words) for _ in range(50)]}
     
     
 
