@@ -12,7 +12,7 @@ app = FastAPI()
 #     return {"message": "backend for party type :p"}
 
 @app.get("/api/words")
-def get_words(dataset_file: str):
+def get_words(dataset_file: str, num_words: int):
     app_directory = Path(__file__).resolve().parent
     dataset_file_directory = app_directory / "data" / dataset_file
 
@@ -24,7 +24,7 @@ def get_words(dataset_file: str):
         
     words = data["words"]
     
-    return {"words": [random.choice(words) for _ in range(50)]}
+    return {"words": [random.choice(words) for _ in range(num_words)]}
     
     
 

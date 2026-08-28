@@ -6,3 +6,7 @@ export type Screen =
   | "settings";
 
 export type Status = "idle" | "typing" | "completed";
+
+export type PracticeSettings = {
+  numWords: number;
+};

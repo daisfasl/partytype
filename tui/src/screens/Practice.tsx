@@ -1,107 +1,46 @@
-import { Box, Text, useInput, useStdout } from "ink";
+import { Box, useInput, useStdout } from "ink";
 import Header from "../components/Header.js";
-import type { Screen } from "../types.js";
-import Menu from "../components/Menu.js";
+import Footer from "../components/Footer.js";
+import PracticeControls from "../components/practice/PracticeControls.js";
+import PracticeStats from "../components/practice/PracticeStats.js";
+import PracticeText from "../components/practice/PracticeText.js";
+import usePracticePrompt from "../hooks/usePracticePrompt.js";
 import useTypingEngine from "../hooks/useTypingEngine.js";
-import { useEffect, useState, useCallback } from "react";
+import type { PracticeSettings, Screen } from "../types.js";
 
 interface PracticeProps {
   onNavigate: (screen: Screen) => void;
+  settings: PracticeSettings;
 }
 
-export default function Practice({ onNavigate }: PracticeProps) {
+export default function Practice({ onNavigate, settings }: PracticeProps) {
   const { stdout } = useStdout();
-  const [prompt, setPrompt] = useState<string>("");
-  const fetchPrompt = useCallback(() => {
-    fetch("http://localhost:8000/api/words?dataset_file=english.json")
-      .then((response) => response.json())
-      .then((data) => setPrompt(data.words.join(" ")))
-      .catch((error) => console.error(error));
-  }, []);
-
-  useEffect(() => {
-    fetchPrompt();
-  }, [fetchPrompt]);
-
+  const { prompt, fetchPrompt } = usePracticePrompt(settings.numWords);
   const { status, typed, restart, wpm, accuracy } = useTypingEngine(prompt);
 
-  const menuOptions: { label: string; onSelect: () => void }[] = [
-    {
-      label: "Restart ↻",
-      onSelect: () => {
-        restart();
-        fetchPrompt();
-      },
-    },
-    { label: "Settings ⚙", onSelect: () => onNavigate("settings") },
-    { label: "Exit [Esc]", onSelect: () => onNavigate("home") },
-  ];
+  const restartPractice = () => {
+    restart();
+    fetchPrompt();
+  };
 
-  useInput((input, key) => {
+  useInput((_input, key) => {
     if (key.escape) {
       onNavigate("home");
     }
   });
 
-  let globalCharIndex = 0;
-
   return (
     <Box flexDirection="column" padding={1} height={stdout.rows}>
-      {/* Header */}
       <Header subtitle="Practice Mode" />
-
       <Box flexGrow={1} flexDirection="column" justifyContent="center">
-        {/* Typing Text Box */}
-        <Box width={60} alignSelf="center" flexDirection="row" flexWrap="wrap">
-          {prompt != "" ? (
-            prompt.split(" ").map((word, wordIndex) => {
-              const wordWithSpace =
-                wordIndex < prompt.split(" ").length - 1 ? word + " " : word;
-              const renderedWord = wordWithSpace.split("").map((char) => {
-                const currentIndex = globalCharIndex++;
-                const isCurrent = currentIndex === typed.length;
-                const isTyped = currentIndex < typed.length;
-                const isCorrect = isTyped && typed[currentIndex] === char;
-                const isIncorrect = isTyped && typed[currentIndex] !== char;
-
-                return (
-                  <Text
-                    key={currentIndex}
-                    color={
-                      isCorrect
-                        ? "#a6e3a1"
-                        : isIncorrect
-                          ? "#f38ba8"
-                          : undefined
-                    }
-                    inverse={isCurrent}
-                    dimColor={!isTyped && !isCurrent}
-                  >
-                    {char}
-                  </Text>
-                );
-              });
-
-              return <Text key={wordIndex}>{renderedWord}</Text>;
-            })
-          ) : (
-            <Text>Loading...</Text>
-          )}
-        </Box>
-
-        {/* Statistics */}
-        {status === "completed" && (
-          <Box alignSelf="center" justifyContent="center" marginTop={1}>
-            <Text>wpm: {wpm}</Text>
-            <Text> accuracy: {accuracy}%</Text>
-          </Box>
-        )}
-
-        {/* Footer Controls */}
+        <PracticeText prompt={prompt} typed={typed} />
+        <PracticeStats status={status} wpm={wpm} accuracy={accuracy} />
         {status !== "typing" && (
-          <Box width={60} alignSelf="center" justifyContent="center">
-            <Menu direction="row" options={menuOptions} />
-          </Box>
+          <PracticeControls
+            onRestart={restartPractice}
+            onSettings={() => onNavigate("settings")}
+            onExit={() => onNavigate("home")}
+          />
         )}
       </Box>
     </Box>
