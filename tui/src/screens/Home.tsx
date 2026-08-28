@@ -1,4 +1,4 @@
-import { Box, Text } from "ink";
+import { Box, Text, useStdout } from "ink";
 import Header from "../components/Header.js";
 import DashboardFooter from "../components/dashboard/DashboardFooter.js";
 import Menu from "../components/Menu.js";
@@ -15,9 +15,16 @@ export default function Home({ onNavigate }: HomeProps) {
     { label: "Join a Party", onSelect: () => onNavigate("join-party") },
     { label: "Settings", onSelect: () => onNavigate("settings") },
   ];
+  const { stdout } = useStdout();
+  const terminalHeight = stdout.rows;
 
   return (
-    <Box width="100%" height="100%" alignItems="center" justifyContent="center">
+    <Box
+      width="100%"
+      alignItems="center"
+      justifyContent="center"
+      height={terminalHeight}
+    >
       <Box flexDirection="column" borderStyle="round" width={60} paddingX={1}>
         <Header subtitle="version 0.1" />
         {/* Welcome Message */}
