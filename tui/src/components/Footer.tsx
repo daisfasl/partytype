@@ -1,6 +1,14 @@
 import { Box, Text } from "ink";
 
-export default function DashboardFooter() {
+interface DashboardFooterProps {
+  statusText?: string;
+  helpText?: string;
+}
+
+export default function DashboardFooter({
+  statusText = "offline",
+  helpText = "[↑↓] select · [enter] open · [q] quit",
+}: DashboardFooterProps) {
   return (
     <Box
       borderStyle="single"
@@ -13,9 +21,9 @@ export default function DashboardFooter() {
       marginTop={1}
       justifyContent="space-between"
     >
-      <Text color="red">offline</Text>
+      <Text color="red">{statusText}</Text>
       {/* online when connected to API */}
-      <Text dimColor>[↑↓] select · [enter] open · [q] quit</Text>
+      <Text dimColor>{helpText}</Text>
     </Box>
   );
 }

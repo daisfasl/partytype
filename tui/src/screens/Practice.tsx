@@ -11,7 +11,6 @@ interface PracticeProps {
 
 export default function Practice({ onNavigate }: PracticeProps) {
   const { stdout } = useStdout();
-  const terminalHeight = stdout.rows;
   const [prompt, setPrompt] = useState<string>("");
   const fetchPrompt = useCallback(() => {
     fetch("http://localhost:8000/api/words?dataset_file=english.json")
@@ -34,7 +33,7 @@ export default function Practice({ onNavigate }: PracticeProps) {
         fetchPrompt();
       },
     },
-    { label: "Settings ⚙", onSelect: () => {} },
+    { label: "Settings ⚙", onSelect: () => onNavigate("settings") },
     { label: "Exit [Esc]", onSelect: () => onNavigate("home") },
   ];
 
@@ -47,14 +46,14 @@ export default function Practice({ onNavigate }: PracticeProps) {
   let globalCharIndex = 0;
 
   return (
-    <Box flexDirection="column" padding={1} height={terminalHeight}>
+    <Box flexDirection="column" padding={1} height={stdout.rows}>
       {/* Header */}
       <Header subtitle="Practice Mode" />
 
       <Box flexGrow={1} flexDirection="column" justifyContent="center">
         {/* Typing Text Box */}
         <Box width={60} alignSelf="center" flexDirection="row" flexWrap="wrap">
-          {prompt !== "" ? (
+          {prompt != "" ? (
             prompt.split(" ").map((word, wordIndex) => {
               const wordWithSpace =
                 wordIndex < prompt.split(" ").length - 1 ? word + " " : word;

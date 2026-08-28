@@ -1,6 +1,6 @@
 import { Box, Text, useStdout } from "ink";
 import Header from "../components/Header.js";
-import DashboardFooter from "../components/dashboard/DashboardFooter.js";
+import Footer from "../components/Footer.js";
 import Menu from "../components/Menu.js";
 import { Screen } from "../types.js";
 
@@ -16,14 +16,13 @@ export default function Home({ onNavigate }: HomeProps) {
     { label: "Settings", onSelect: () => onNavigate("settings") },
   ];
   const { stdout } = useStdout();
-  const terminalHeight = stdout.rows;
 
   return (
     <Box
       width="100%"
       alignItems="center"
       justifyContent="center"
-      height={terminalHeight}
+      height={stdout.rows}
     >
       <Box flexDirection="column" borderStyle="round" width={60} paddingX={1}>
         <Header subtitle="version 0.1" />
@@ -33,7 +32,7 @@ export default function Home({ onNavigate }: HomeProps) {
           <Text>How would you like to type?</Text>
         </Box>
         <Menu direction="column" options={menuOptions} />
-        <DashboardFooter />
+        <Footer />
       </Box>
     </Box>
   );
