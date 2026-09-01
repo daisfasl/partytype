@@ -7,6 +7,10 @@ import json
 
 app = FastAPI()
 
+@app.get("/api/health")
+def health_check():
+    return {"status": "ok"}
+
 # @app.get("/")
 # async def root():
 #     return {"message": "backend for party type :p"}
@@ -27,5 +31,4 @@ def get_words(dataset_file: str, num_words: int):
     return {"words": [random.choice(words) for _ in range(num_words)]}
     
     
-
 

@@ -1,28 +1,29 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
+import useApi from "./useApiStatus.js";
 
 export default function usePracticePrompt(numWords: number) {
-  const [prompt, setPrompt] = useState("");
-
-  const fetchPrompt = useCallback(() => {
+  const requestPrompt = useCallback(() => {
     const params = new URLSearchParams({
       dataset_file: "english.json",
       num_words: String(numWords),
     });
 
-    fetch(`http://localhost:8000/api/words?${params}`)
-      .then((response) => {
+    return fetch(`http://localhost:8000/api/words?${params}`).then(
+      (response) => {
         if (!response.ok) {
-          throw new Error(`Unable to fetch practice words (${response.status})`);
+          throw new Error(
+            `Unable to fetch practice words (${response.status})`,
+          );
         }
         return response.json() as Promise<{ words: string[] }>;
-      })
-      .then((data) => setPrompt(data.words.join(" ")))
-      .catch((error) => console.error(error));
+      },
+    );
   }, [numWords]);
 
-  useEffect(() => {
-    fetchPrompt();
-  }, [fetchPrompt]);
+  const { data, refetch } = useApi(requestPrompt);
 
-  return { prompt, fetchPrompt };
+  return {
+    prompt: data?.words.join(" ") ?? "",
+    fetchPrompt: refetch,
+  };
 }

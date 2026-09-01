@@ -12,8 +12,6 @@ export default function PracticeStats({
   wpm,
   accuracy,
 }: PracticeStatsProps) {
-  if (status !== "completed") return null;
-
   return (
     <Box alignSelf="center" justifyContent="center" marginTop={1}>
       <Text>wpm: {wpm}</Text>

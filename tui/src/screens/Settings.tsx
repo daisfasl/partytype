@@ -3,12 +3,14 @@ import Header from "../components/Header.js";
 import Menu from "../components/Menu.js";
 import type { PracticeSettings, Screen } from "../types.js";
 import Footer from "../components/Footer.js";
+import type { ApiStatus } from "../hooks/useApiStatus.js";
 
 interface SettingsProps {
   onNavigate: (screen: Screen) => void;
   returnTo: "home" | "practice";
   settings: PracticeSettings;
   onSettingsChange: (settings: PracticeSettings) => void;
+  apiStatus: ApiStatus;
 }
 
 const wordCountOptions = [10, 30, 50, 100];
@@ -18,6 +20,7 @@ export default function Settings({
   returnTo,
   settings,
   onSettingsChange,
+  apiStatus,
 }: SettingsProps) {
   const { stdout } = useStdout();
   const updateWordCount = (direction: -1 | 1) => {
@@ -64,7 +67,10 @@ export default function Settings({
       <Box flexDirection="column" borderStyle="round" width={60} paddingX={1}>
         <Header subtitle="Settings" />
         <Menu direction="column" options={menuOptions} />
-        <Footer helpText="[↑↓] select · [←→] change · [esc] back" />
+        <Footer
+          apiStatus={apiStatus}
+          helpText="[↑↓] select · [←→] change · [esc] back"
+        />
       </Box>
     </Box>
   );

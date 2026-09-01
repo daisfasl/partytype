@@ -1,14 +1,17 @@
 import { Box, Text } from "ink";
+import type { ApiStatus } from "../hooks/useApiStatus.js";
 
-interface DashboardFooterProps {
-  statusText?: string;
+interface FooterProps {
+  apiStatus?: ApiStatus;
   helpText?: string;
 }
 
-export default function DashboardFooter({
-  statusText = "offline",
+export default function Footer({
+  apiStatus = "offline",
   helpText = "[↑↓] select · [enter] open · [q] quit",
-}: DashboardFooterProps) {
+}: FooterProps) {
+  const isOnline = apiStatus === "online";
+
   return (
     <Box
       borderStyle="single"
@@ -21,8 +24,9 @@ export default function DashboardFooter({
       marginTop={1}
       justifyContent="space-between"
     >
-      <Text color="red">{statusText}</Text>
-      {/* online when connected to API */}
+      <Text color={isOnline ? "green" : "red"}>
+        {isOnline ? "● online" : "● offline"}
+      </Text>
       <Text dimColor>{helpText}</Text>
     </Box>
   );

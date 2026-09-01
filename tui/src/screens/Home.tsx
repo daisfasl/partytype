@@ -3,12 +3,14 @@ import Header from "../components/Header.js";
 import Footer from "../components/Footer.js";
 import Menu from "../components/Menu.js";
 import { Screen } from "../types.js";
+import type { ApiStatus } from "../hooks/useApiStatus.js";
 
 interface HomeProps {
   onNavigate: (screen: Screen) => void;
+  apiStatus: ApiStatus;
 }
 
-export default function Home({ onNavigate }: HomeProps) {
+export default function Home({ onNavigate, apiStatus }: HomeProps) {
   const menuOptions: { label: string; onSelect: () => void }[] = [
     { label: "Practice Mode", onSelect: () => onNavigate("practice") },
     { label: "Create a Party", onSelect: () => onNavigate("create-party") },
@@ -32,7 +34,7 @@ export default function Home({ onNavigate }: HomeProps) {
           <Text>How would you like to type?</Text>
         </Box>
         <Menu direction="column" options={menuOptions} />
-        <Footer />
+        <Footer apiStatus={apiStatus} />
       </Box>
     </Box>
   );
