@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-# from fastapi import WebSocket, WebSocketDisconnect
 from pathlib import Path
 import random
+from app.api.websockets import websockets_router
 import json
 
 
@@ -32,3 +32,4 @@ def get_words(dataset_file: str, num_words: int):
     
     
 
+app.include_router(websockets_router)

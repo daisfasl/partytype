@@ -15,7 +15,6 @@ class Player(TypedDict):
 # ------------------------- 
 class ProgressPayload(BaseModel):
     type: Literal["progress"]
-    player_id: str
     cursor: int
     completed_words: int 
 
@@ -48,6 +47,11 @@ class CountdownPayload(BaseModel):
 
 class GameEndPayload(BaseModel):
     type: Literal["end"]
+    winner: str
+
+class ErrorPayload(BaseModel):
+    type: Literal["error"]
+    message: str
     
 
 # ------------------------- 
@@ -67,6 +71,7 @@ Payload = Annotated[Union[ProgressPayload,
                           CountdownPayload,
                           MessagePayload,
                           GameEndPayload,
+                          ErrorPayload,
                           ],
                 Field(discriminator= 'type')] ## tells pydantic to look at 'type'
                                               ## to differentiate between payloads
