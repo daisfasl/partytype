@@ -22,12 +22,15 @@ async def game_loop(ws: WebSocket, player_id: str, room_id: str):
             try:
                 payload = type_adapter.validate_python(payload)
             except ValidationError as e:
+                first_error = e.errors()[0]
+                field = ".".join(str(p) for p in first_error["loc"] if p != "type") or "payload"
                 error_msg = ErrorPayload(type="error",
-                                         message = str(e))
-                await ws.send_json(error_msg.model_dump_json())
+                                         message = f"Invalid {field}: {first_error['msg']}")
+                await ws.send_text(error_msg.model_dump_json())
+                continue
             match payload: # call corresponding ConnectionManager func. to payload
                 case StartPayload():
-                    asyncio.create_task(manager.handle_host_start(room_id, payload,player_id))
+                    asyncio.create_task(manager.handle_host_start(room_id, player_id))
                 case ProgressPayload():
                     await manager.handle_progress(room_id, payload,player_id)
                 case MessagePayload():
@@ -47,7 +50,7 @@ async def websocket_endpoint(ws: WebSocket, player_id: str, room_id: str):
     # connect to room
     connection = await manager.connect(ws, room_id, player_id)
     if connection: # connection = ErrorPayload
-       await ws.send_json(connection.model_dump_json()) # send error message to player
+       await ws.send_text(connection.model_dump_json()) # send error message to player
        await ws.close()
        return
     else:
