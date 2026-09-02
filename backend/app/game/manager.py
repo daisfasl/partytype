@@ -104,10 +104,11 @@ class ConnectionManager:
 
 
     # handles host starting the game
-    async def handle_host_start(self, room: str, player_id: str):
+    async def handle_host_start(self, room: str, player_id: str, payload: StartPayload):
         if room in self.rooms:
             if player_id == self.rooms[room]["host"] and self.rooms[room]["status"] == "waiting":
                 self.rooms[room]["status"] = "countdown"
+                self.rooms[room]["text"] = payload.text
                 await self.handle_room_update(room)
                 from app.game.engine import run_game
                 mode = self.rooms[room]["mode"]

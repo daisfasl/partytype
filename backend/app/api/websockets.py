@@ -30,7 +30,7 @@ async def game_loop(ws: WebSocket, player_id: str, room_id: str):
                 continue
             match payload: # call corresponding ConnectionManager func. to payload
                 case StartPayload():
-                    asyncio.create_task(manager.handle_host_start(room_id, player_id))
+                    asyncio.create_task(manager.handle_host_start(room_id, player_id, payload))
                 case ProgressPayload():
                     await manager.handle_progress(room_id, payload,player_id)
                 case MessagePayload():

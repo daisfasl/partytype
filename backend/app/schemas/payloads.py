@@ -23,6 +23,7 @@ class ProgressPayload(BaseModel):
 
 class StartPayload(BaseModel):
     type: Literal["start"]
+    text: str
 
 class FinishPayload(BaseModel):
     type: Literal["finish"]
