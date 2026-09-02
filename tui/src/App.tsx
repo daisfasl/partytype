@@ -1,3 +1,4 @@
+import { useWindowSize } from "ink";
 import { useCallback, useState } from "react";
 import Home from "./screens/Home.js";
 import Practice from "./screens/Practice.js";
@@ -6,6 +7,7 @@ import { PracticeSettings, Screen } from "./types.js";
 import useApi from "./hooks/useApiStatus.js";
 
 export default function App() {
+  const windowSize = useWindowSize();
   const [currentScreen, setScreen] = useState<Screen>("practice");
   const [settingsReturnScreen, setSettingsReturnScreen] = useState<
     "home" | "practice"
@@ -35,13 +37,20 @@ export default function App() {
   }
 
   if (currentScreen === "home") {
-    return <Home onNavigate={navigateTo} apiStatus={apiStatus} />;
+    return (
+      <Home
+        onNavigate={navigateTo}
+        apiStatus={apiStatus}
+        windowSize={windowSize}
+      />
+    );
   } else if (currentScreen === "practice") {
     return (
       <Practice
         onNavigate={navigateTo}
         settings={practiceSettings}
         apiStatus={apiStatus}
+        windowSize={windowSize}
       />
     );
   } else if (currentScreen === "settings") {
@@ -52,6 +61,7 @@ export default function App() {
         settings={practiceSettings}
         onSettingsChange={setPracticeSettings}
         apiStatus={apiStatus}
+        windowSize={windowSize}
       />
     );
   }

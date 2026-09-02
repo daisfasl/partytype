@@ -1,4 +1,4 @@
-import { Box, Text } from "ink";
+import { Box, Text, useWindowSize } from "ink";
 
 interface PracticeTextProps {
   prompt: string;
@@ -6,13 +6,21 @@ interface PracticeTextProps {
 }
 
 export default function PracticeText({ prompt, typed }: PracticeTextProps) {
+  const { columns } = useWindowSize();
+  const promptWidth = Math.max(20, Math.min(columns - 4, columns));
+
   if (prompt === "") {
     return <Text>Loading...</Text>;
   }
 
   let charIndex = 0;
   return (
-    <Box width={60} alignSelf="center" flexDirection="row" flexWrap="wrap">
+    <Box
+      width={promptWidth}
+      alignSelf="center"
+      flexDirection="row"
+      flexWrap="wrap"
+    >
       {prompt.split(" ").map((word, wordIndex, words) => {
         const wordWithSpace = wordIndex < words.length - 1 ? `${word} ` : word;
         return (

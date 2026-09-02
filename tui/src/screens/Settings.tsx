@@ -1,9 +1,8 @@
 import { Box, useInput, useStdout } from "ink";
 import Header from "../components/Header.js";
 import Menu from "../components/Menu.js";
-import type { PracticeSettings, Screen } from "../types.js";
+import type { ApiStatus, PracticeSettings, Screen } from "../types.js";
 import Footer from "../components/Footer.js";
-import type { ApiStatus } from "../hooks/useApiStatus.js";
 
 interface SettingsProps {
   onNavigate: (screen: Screen) => void;
@@ -11,6 +10,7 @@ interface SettingsProps {
   settings: PracticeSettings;
   onSettingsChange: (settings: PracticeSettings) => void;
   apiStatus: ApiStatus;
+  windowSize: { columns: number; rows: number };
 }
 
 const wordCountOptions = [10, 30, 50, 100];
@@ -21,8 +21,8 @@ export default function Settings({
   settings,
   onSettingsChange,
   apiStatus,
+  windowSize,
 }: SettingsProps) {
-  const { stdout } = useStdout();
   const updateWordCount = (direction: -1 | 1) => {
     const currentIndex = wordCountOptions.indexOf(settings.numWords);
     const nextIndex =
@@ -62,9 +62,14 @@ export default function Settings({
       width="100%"
       alignItems="center"
       justifyContent="center"
-      height={stdout.rows}
+      height={windowSize.rows}
     >
-      <Box flexDirection="column" borderStyle="round" width={60} paddingX={1}>
+      <Box
+        flexDirection="column"
+        borderStyle="round"
+        width={Math.min(80, Math.max(40, windowSize.columns - 4))}
+        paddingX={1}
+      >
         <Header subtitle="Settings" />
         <Menu direction="column" options={menuOptions} />
         <Footer

@@ -1,4 +1,4 @@
-import { Box, useInput, useStdout } from "ink";
+import { Box, useInput } from "ink";
 import { useState } from "react";
 import Header from "../components/Header.js";
 import Footer from "../components/Footer.js";
@@ -7,21 +7,21 @@ import PracticeStats from "../components/practice/PracticeStats.js";
 import PracticeText from "../components/practice/PracticeText.js";
 import usePracticePrompt from "../hooks/usePracticePrompt.js";
 import useTypingEngine from "../hooks/useTypingEngine.js";
-import type { PracticeSettings, Screen } from "../types.js";
-import type { ApiStatus } from "../hooks/useApiStatus.js";
+import type { ApiStatus, PracticeSettings, Screen } from "../types.js";
 
 interface PracticeProps {
   onNavigate: (screen: Screen) => void;
   settings: PracticeSettings;
   apiStatus: ApiStatus;
+  windowSize: { columns: number; rows: number };
 }
 
 export default function Practice({
   onNavigate,
   settings,
   apiStatus,
+  windowSize,
 }: PracticeProps) {
-  const { stdout } = useStdout();
   const [showStats, setShowStats] = useState(false);
   const { prompt, fetchPrompt } = usePracticePrompt(settings.numWords);
   const { status, typed, restart, wpm, accuracy } = useTypingEngine(prompt);
@@ -44,7 +44,7 @@ export default function Practice({
   const shouldShowStats = showStats || status === "completed";
 
   return (
-    <Box flexDirection="column" padding={1} height={stdout.rows}>
+    <Box flexDirection="column" padding={1} height={windowSize.rows}>
       <Header subtitle="Practice Mode" />
       <Box flexGrow={1} flexDirection="column" justifyContent="center">
         <PracticeText prompt={prompt} typed={typed} />

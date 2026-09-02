@@ -20,7 +20,7 @@ export default function usePracticePrompt(numWords: number) {
     );
   }, [numWords]);
 
-  const { data, refetch } = useApi(requestPrompt);
+  const { data, refetch } = useApi<{ words: string[] }>(requestPrompt);
 
   return {
     prompt: data?.words.join(" ") ?? "",

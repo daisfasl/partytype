@@ -1,4 +1,4 @@
-import { Box } from "ink";
+import { Box, useWindowSize } from "ink";
 import Menu from "../Menu.js";
 
 interface PracticeControlsProps {
@@ -12,8 +12,11 @@ export default function PracticeControls({
   onSettings,
   onExit,
 }: PracticeControlsProps) {
+  const { columns } = useWindowSize();
+  const controlsWidth = Math.max(20, Math.min(columns - 4, columns));
+
   return (
-    <Box width={60} alignSelf="center" justifyContent="center">
+    <Box width={controlsWidth} alignSelf="center" justifyContent="center">
       <Menu
         direction="row"
         options={[

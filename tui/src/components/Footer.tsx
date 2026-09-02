@@ -1,5 +1,5 @@
 import { Box, Text } from "ink";
-import type { ApiStatus } from "../hooks/useApiStatus.js";
+import type { ApiStatus } from "../types.js";
 
 interface FooterProps {
   apiStatus?: ApiStatus;

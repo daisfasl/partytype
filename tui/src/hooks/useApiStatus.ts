@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import type { ApiStatus } from "../types.js";
 
-export default function useApi(request: () => Promise<any>) {
-  const [data, setData] = useState();
+export default function useApi<T>(request: () => Promise<T>) {
+  const [data, setData] = useState<T | undefined>();
   const [status, setStatus] = useState<ApiStatus>("loading");
 
   const fetchData = useCallback(() => {
