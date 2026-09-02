@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch src/cli.tsx",
-    "start": "tsx src/cli.tsx",
+    "dev": "bun --watch src/cli.tsx",
+    "start": "bun run src/cli.tsx",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [],
@@ -21,7 +21,6 @@
   "devDependencies": {
     "@types/node": "^26.2.0",
     "@types/react": "^19.2.18",
-    "tsx": "^4.23.12",
     "typescript": "^7.0.2"
   },
   "allowScripts": {
