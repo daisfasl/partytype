@@ -9,18 +9,20 @@ class Player(TypedDict):
     cursor: int
     completed_words: int
     wpm: float
+    correct_chars: int
+    accuracy: float
 
-# ------------------------- 
+# -------------------------
 # ------------------------- Players -> Server
-# ------------------------- 
+# -------------------------
 class ProgressPayload(BaseModel):
     type: Literal["progress"]
     cursor: int
-    completed_words: int 
+    completed_words: int
+    correct_chars: int
 
 class StartPayload(BaseModel):
     type: Literal["start"]
-    player_id: str
 
 class FinishPayload(BaseModel):
     type: Literal["finish"]
@@ -36,9 +38,8 @@ class RoomPayload(BaseModel):
     mode: Literal["time", "words", "quote"]
     status: Literal["waiting", "countdown", "active", "completed"]
     time_setting: int
-    time_remaining: float
     text: str
-    players: dict[str, Player] 
+    players: dict[str, Player]
     host: str
 
 class CountdownPayload(BaseModel):
