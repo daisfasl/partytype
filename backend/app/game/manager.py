@@ -1,6 +1,7 @@
 from fastapi import WebSocket
 import asyncio
 from app.schemas.payloads import *
+from app.game.constants import MAX_RACE_DURATION
 from typing import cast
 import time
 
@@ -19,7 +20,8 @@ class ConnectionManager:
             "status" : "waiting", # represents lobby states, one of:
                                   # 1) waiting 2) countdown 3) active
             "text" : "The quick brown fox jumps over the lazy dog.",
-            "time_setting" : 60, # selected time setting, int
+            "time_setting" : 60, # selected time setting (seconds), only meaningful in "time" mode
+            "word_count" : 25, # selected word count, only meaningful in "words" mode
             "players" : {},
             "host" : player_id,
             "start_time": None,
@@ -108,7 +110,12 @@ class ConnectionManager:
                 self.rooms[room]["status"] = "countdown"
                 await self.handle_room_update(room)
                 from app.game.engine import run_game
-                await run_game(room, self.rooms[room]["time_setting"])
+                mode = self.rooms[room]["mode"]
+                # "time" mode uses the host-configured duration; "words"/"quote"
+                # modes end when someone finishes, but get a safety-cap backstop
+                # so an abandoned race can't hold the room open forever.
+                duration = self.rooms[room]["time_setting"] if mode == "time" else MAX_RACE_DURATION
+                await run_game(room, duration)
 
 
 
@@ -128,13 +135,19 @@ class ConnectionManager:
                                                mode = self.rooms[room]["mode"],
                                                status = self.rooms[room]["status"],
                                                time_setting = self.rooms[room]["time_setting"],
+                                               word_count = self.rooms[room]["word_count"],
                                                text = self.rooms[room]["text"],
                                                players = self.rooms[room]["players"],
                                                host = self.rooms[room]["host"]))
 
-    async def host_change_settings(self, room: str, player_id):
-       if room in self.rooms:
-           pass
+    # handles the host updating room settings (mode/time_setting/word_count)
+    async def host_change_settings(self, room: str, player_id: str, payload: UpdateSettingsPayload):
+        if room in self.rooms:
+            if player_id == self.rooms[room]["host"] and self.rooms[room]["status"] == "waiting":
+                self.rooms[room]["mode"] = payload.mode
+                self.rooms[room]["time_setting"] = payload.time_setting
+                self.rooms[room]["word_count"] = payload.word_count
+                await self.handle_room_update(room)
     
     def set_start_time(self, room: str, start_time):
         if room in self.rooms:

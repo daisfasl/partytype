@@ -26,7 +26,12 @@ class StartPayload(BaseModel):
 
 class FinishPayload(BaseModel):
     type: Literal["finish"]
-    player_id: str
+
+class UpdateSettingsPayload(BaseModel):
+    type: Literal["settings"]
+    mode: Literal["time", "words", "quote"]
+    time_setting: int = Field(ge = 15, le = 300)
+    word_count: int = Field(ge = 10, le = 200)
 
 # ------------------------- 
 # ------------------------- Server -> Players
@@ -38,6 +43,7 @@ class RoomPayload(BaseModel):
     mode: Literal["time", "words", "quote"]
     status: Literal["waiting", "countdown", "active", "completed"]
     time_setting: int
+    word_count: int
     text: str
     players: dict[str, Player]
     host: str
@@ -66,13 +72,15 @@ class MessagePayload(BaseModel):
 
 
 # BaseModel union type
-Payload = Annotated[Union[ProgressPayload, 
+Payload = Annotated[Union[ProgressPayload,
                           StartPayload,
+                          FinishPayload,
                           RoomPayload,
                           CountdownPayload,
                           MessagePayload,
                           GameEndPayload,
                           ErrorPayload,
+                          UpdateSettingsPayload,
                           ],
                 Field(discriminator= 'type')] ## tells pydantic to look at 'type'
                                               ## to differentiate between payloads

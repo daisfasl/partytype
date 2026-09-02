@@ -37,6 +37,8 @@ async def game_loop(ws: WebSocket, player_id: str, room_id: str):
                     await manager.broadcast(room_id, payload)
                 case FinishPayload():
                     await manager.handle_player_finish(room_id, player_id)
+                case UpdateSettingsPayload():
+                    await manager.host_change_settings(room_id, player_id, payload)
     except WebSocketDisconnect:
         await manager.disconnect(ws, room_id, player_id)
 
