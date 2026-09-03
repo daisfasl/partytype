@@ -42,4 +42,8 @@ export default function ModeOption({
       onRight={() => update(1)}
     />
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> dff8978ad73c5f27fb22c538ff5a282818f55f0c

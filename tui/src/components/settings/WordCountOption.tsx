@@ -32,6 +32,7 @@ export default function WordCountOption({
     registerActions?.({ onLeft: () => update(-1), onRight: () => update(1) });
   });
 
+<<<<<<< HEAD
   return (
     <MenuItem
       label="Number of words"
@@ -43,3 +44,7 @@ export default function WordCountOption({
     />
   );
 }
+=======
+  return <MenuItem label="Number of words" value={String(settings.numWords)} isSelected={isSelected} direction={direction} onLeft={() => update(-1)} onRight={() => update(1)} />;
+}
+>>>>>>> dff8978ad73c5f27fb22c538ff5a282818f55f0c
