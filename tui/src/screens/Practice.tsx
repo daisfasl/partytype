@@ -1,5 +1,5 @@
-import { Box, useInput } from "ink";
-import { useState } from "react";
+import { Box, Text, useInput } from "ink";
+import { useEffect, useState } from "react";
 import Header from "../components/Header.js";
 import Footer from "../components/Footer.js";
 import PracticeControls from "../components/practice/PracticeControls.js";
@@ -23,8 +23,44 @@ export default function Practice({
   windowSize,
 }: PracticeProps) {
   const [showStats, setShowStats] = useState(false);
-  const { prompt, fetchPrompt } = usePracticePrompt(settings.numWords);
-  const { status, typed, restart, wpm, accuracy } = useTypingEngine(prompt);
+  const promptSize = settings.mode === "timed" ? 50 : settings.numWords;
+  const { prompt, fetchPrompt, appendPrompt } = usePracticePrompt(promptSize);
+  const { status, typed, restart, wpm, accuracy, timeLeft } = useTypingEngine(
+    prompt,
+    settings.mode === "timed" ? settings.timeLimit : undefined,
+  );
+
+  const isTimedMode = settings.mode === "timed";
+  const visibleWidth = Math.max(
+    20,
+    Math.min(windowSize.columns - 4, windowSize.columns),
+  );
+  const appendThreshold = Math.max(30, Math.floor(visibleWidth * 0.8));
+
+  useEffect(() => {
+    fetchPrompt();
+    restart();
+  }, [fetchPrompt, settings.mode, settings.numWords, settings.timeLimit]);
+
+  useEffect(() => {
+    if (
+      isTimedMode &&
+      status === "typing" &&
+      prompt.length > 0 &&
+      timeLeft > 0 &&
+      typed.length >= Math.min(prompt.length, appendThreshold)
+    ) {
+      appendPrompt();
+    }
+  }, [
+    appendPrompt,
+    appendThreshold,
+    isTimedMode,
+    prompt.length,
+    status,
+    timeLeft,
+    typed.length,
+  ]);
 
   const restartPractice = () => {
     setShowStats(false);
@@ -45,11 +81,25 @@ export default function Practice({
 
   return (
     <Box flexDirection="column" padding={1} height={windowSize.rows}>
-      <Header subtitle="Practice Mode" />
+      <Header
+        subtitle={
+          isTimedMode ? `Timed ${settings.timeLimit}s` : "Practice Mode"
+        }
+      />
       <Box flexGrow={1} flexDirection="column" justifyContent="center">
+        {isTimedMode && (
+          <Box marginBottom={1}>
+            <Text color="cyan">Time: {timeLeft}s</Text>
+          </Box>
+        )}
         <PracticeText prompt={prompt} typed={typed} />
         {shouldShowStats && (
-          <PracticeStats status={status} wpm={wpm} accuracy={accuracy} />
+          <PracticeStats
+            status={status}
+            wpm={wpm}
+            accuracy={accuracy}
+            timeLeft={isTimedMode ? timeLeft : undefined}
+          />
         )}
         {status !== "typing" && (
           <PracticeControls

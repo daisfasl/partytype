@@ -1,7 +1,8 @@
-import { useCallback } from "react";
-import useApi from "./useApiStatus.js";
+import { useCallback, useState } from "react";
 
 export default function usePracticePrompt(numWords: number) {
+  const [prompt, setPrompt] = useState("");
+
   const requestPrompt = useCallback(() => {
     const params = new URLSearchParams({
       dataset_file: "english.json",
@@ -20,10 +21,27 @@ export default function usePracticePrompt(numWords: number) {
     );
   }, [numWords]);
 
-  const { data, refetch } = useApi<{ words: string[] }>(requestPrompt);
+  const fetchPrompt = useCallback(() => {
+    return requestPrompt().then((data) => {
+      const nextPrompt = data.words.join(" ");
+      setPrompt(nextPrompt);
+      return nextPrompt;
+    });
+  }, [requestPrompt]);
+
+  const appendPrompt = useCallback(() => {
+    return requestPrompt().then((data) => {
+      const nextWords = data.words.join(" ");
+      setPrompt((current) =>
+        current ? `${current} ${nextWords}`.trim() : nextWords,
+      );
+      return nextWords;
+    });
+  }, [requestPrompt]);
 
   return {
-    prompt: data?.words.join(" ") ?? "",
-    fetchPrompt: refetch,
+    prompt,
+    fetchPrompt,
+    appendPrompt,
   };
 }

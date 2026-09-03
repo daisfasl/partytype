@@ -5,17 +5,20 @@ interface PracticeStatsProps {
   status: Status;
   wpm: number;
   accuracy: number;
+  timeLeft?: number;
 }
 
 export default function PracticeStats({
   status,
   wpm,
   accuracy,
+  timeLeft,
 }: PracticeStatsProps) {
   return (
     <Box alignSelf="center" justifyContent="center" marginTop={1}>
       <Text>wpm: {wpm}</Text>
       <Text> accuracy: {accuracy}%</Text>
+      {typeof timeLeft === "number" && <Text> time: {timeLeft}s</Text>}
     </Box>
   );
 }

@@ -1,5 +1,6 @@
 import { Box, useWindowSize } from "ink";
 import Menu from "../Menu.js";
+import MenuItem from "../MenuItem.js";
 
 interface PracticeControlsProps {
   onRestart: () => void;
@@ -19,12 +20,11 @@ export default function PracticeControls({
     <Box width={controlsWidth} alignSelf="center" justifyContent="center">
       <Menu
         direction="row"
-        options={[
-          { label: "Restart ↻", onSelect: onRestart },
-          { label: "Settings ⚙", onSelect: onSettings },
-          { label: "Exit [Esc]", onSelect: onExit },
-        ]}
-      />
+      >
+        <MenuItem label="Restart ↻" onSelect={onRestart} />
+        <MenuItem label="Settings ⚙" onSelect={onSettings} />
+        <MenuItem label="Exit [Esc]" onSelect={onExit} />
+      </Menu>
     </Box>
   );
 }
