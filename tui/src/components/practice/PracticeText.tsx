@@ -7,8 +7,8 @@ interface PracticeTextProps {
 
 export default function PracticeText({ prompt, typed }: PracticeTextProps) {
   const { columns } = useWindowSize();
-  const maxVisibleLines = 4;
-  const promptWidth = Math.max(20, Math.min(columns - 4, columns));
+  const maxVisibleLines = 3;
+  const promptWidth = Math.max(20, Math.min(72, columns - 8));
 
   if (prompt === "") {
     return <Text>Loading...</Text>;
@@ -54,7 +54,7 @@ export default function PracticeText({ prompt, typed }: PracticeTextProps) {
     cursorLineIndex = index;
   }
 
-  const startLineIndex = Math.max(0, cursorLineIndex - maxVisibleLines + 1);
+  const startLineIndex = Math.max(0, cursorLineIndex - maxVisibleLines + 2);
   const visibleLines = lines.slice(
     startLineIndex,
     startLineIndex + maxVisibleLines,

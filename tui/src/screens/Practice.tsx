@@ -23,7 +23,7 @@ export default function Practice({
   windowSize,
 }: PracticeProps) {
   const [showStats, setShowStats] = useState(false);
-  const promptSize = settings.mode === "timed" ? 50 : settings.numWords;
+  const promptSize = settings.mode === "timed" ? 10 : settings.numWords;
   const { prompt, fetchPrompt, appendPrompt } = usePracticePrompt(promptSize);
   const { status, typed, restart, wpm, accuracy, timeLeft } = useTypingEngine(
     prompt,
@@ -94,12 +94,7 @@ export default function Practice({
         )}
         <PracticeText prompt={prompt} typed={typed} />
         {shouldShowStats && (
-          <PracticeStats
-            status={status}
-            wpm={wpm}
-            accuracy={accuracy}
-            timeLeft={isTimedMode ? timeLeft : undefined}
-          />
+          <PracticeStats status={status} wpm={wpm} accuracy={accuracy} />
         )}
         {status !== "typing" && (
           <PracticeControls
