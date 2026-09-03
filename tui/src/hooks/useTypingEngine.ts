@@ -1,18 +1,47 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Status } from "../types.js";
 import { useInput } from "ink";
 
-export default function useTypingEngine(text: string) {
+export default function useTypingEngine(
+  text: string,
+  timeLimitSeconds?: number,
+) {
   const [status, setStatus] = useState<Status>("idle");
   const [typed, setTyped] = useState<string>("");
   const [startTime, setStartTime] = useState<number | null>(null);
   const [endTime, setEndTime] = useState<number | null>(null);
+  const [timeLeft, setTimeLeft] = useState<number>(timeLimitSeconds ?? 0);
+
   const restart = () => {
     setTyped("");
     setStatus("idle");
     setStartTime(null);
     setEndTime(null);
+    setTimeLeft(timeLimitSeconds ?? 0);
   };
+
+  useEffect(() => {
+    if (!timeLimitSeconds || status !== "typing") {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft((current) => {
+        const next = Math.max(0, current - 1);
+        if (next === 0) {
+          setStatus("completed");
+          setEndTime(Date.now());
+        }
+        return next;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [status, timeLimitSeconds]);
+
+  useEffect(() => {
+    setTimeLeft(timeLimitSeconds ?? 0);
+  }, [timeLimitSeconds]);
 
   useInput((input, key) => {
     if (status === "completed") return;
@@ -33,7 +62,11 @@ export default function useTypingEngine(text: string) {
       return;
     }
 
-    if (typed.length >= text.length) {
+    if (timeLimitSeconds && timeLeft <= 0) {
+      return;
+    }
+
+    if (!timeLimitSeconds && typed.length >= text.length) {
       return;
     }
 
@@ -42,10 +75,13 @@ export default function useTypingEngine(text: string) {
       if (status === "idle") {
         setStatus("typing");
         setStartTime(Date.now());
+        if (timeLimitSeconds) {
+          setTimeLeft(timeLimitSeconds);
+        }
       }
     }
 
-    if (typed.length + 1 === text.length) {
+    if (!timeLimitSeconds && typed.length + 1 === text.length) {
       setStatus("completed");
       setEndTime(Date.now());
     }
@@ -71,5 +107,5 @@ export default function useTypingEngine(text: string) {
     }
   }
 
-  return { status, typed, restart, wpm, accuracy };
+  return { status, typed, restart, wpm, accuracy, timeLeft };
 }

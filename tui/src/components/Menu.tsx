@@ -1,19 +1,30 @@
-import { Box, Text, useInput } from "ink";
-import { useState } from "react";
+import { Box, useInput } from "ink";
+import {
+  Children,
+  cloneElement,
+  isValidElement,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import type { ReactElement, ReactNode } from "react";
+import type { MenuActions, MenuItemProps } from "./MenuItem.js";
 
 interface MenuProps {
-  options: {
-    label: string;
-    value?: string;
-    onSelect?: () => void;
-    onLeft?: () => void;
-    onRight?: () => void;
-  }[];
+  children: ReactNode;
   direction?: "column" | "row";
 }
 
-export default function Menu({ options, direction = "column" }: MenuProps) {
+export default function Menu({ children, direction = "column" }: MenuProps) {
   const [currMenu, setMenu] = useState(0);
+  const actions = useRef<MenuActions[]>([]);
+  const menuItems = Children.toArray(children).filter(
+    isValidElement,
+  ) as ReactElement<MenuItemProps>[];
+
+  useEffect(() => {
+    setMenu((current) => Math.min(current, Math.max(0, menuItems.length - 1)));
+  }, [menuItems.length]);
 
   useInput((input, key) => {
     if (direction === "column") {
@@ -23,17 +34,21 @@ export default function Menu({ options, direction = "column" }: MenuProps) {
         }
       }
       if (key.downArrow) {
-        if (currMenu < options.length - 1) {
+        if (currMenu < menuItems.length - 1) {
           setMenu(currMenu + 1);
         }
       }
     }
     if (direction === "column" && (key.leftArrow || key.rightArrow)) {
-      const selectedItem = options[currMenu];
+      const selectedItem = menuItems[currMenu];
+      const selectedActions = {
+        ...actions.current[currMenu],
+        ...selectedItem?.props,
+      };
       if (key.leftArrow) {
-        selectedItem?.onLeft?.();
+        selectedActions?.onLeft?.();
       } else {
-        selectedItem?.onRight?.();
+        selectedActions?.onRight?.();
       }
     }
     if (direction === "row") {
@@ -43,14 +58,18 @@ export default function Menu({ options, direction = "column" }: MenuProps) {
         }
       }
       if (key.rightArrow) {
-        if (currMenu < options.length - 1) {
+        if (currMenu < menuItems.length - 1) {
           setMenu(currMenu + 1);
         }
       }
     }
     if (key.return) {
-      const selectedItem = options[currMenu];
-      selectedItem?.onSelect?.();
+      const selectedItem = menuItems[currMenu];
+      const selectedActions = {
+        ...actions.current[currMenu],
+        ...selectedItem?.props,
+      };
+      selectedActions?.onSelect?.();
     }
   });
 
@@ -60,34 +79,16 @@ export default function Menu({ options, direction = "column" }: MenuProps) {
       flexDirection={direction}
       gap={direction === "row" ? 2 : 0}
     >
-      {options.map((menuOption, index) => {
-        const isSelected = index === currMenu;
-        const hasValueControls = menuOption.onLeft || menuOption.onRight;
-        if (direction === "row" || !menuOption.value) {
-          return (
-            <Text key={menuOption.label} color={isSelected ? "white" : "gray"}>
-              {isSelected ? "› " : "  "}
-              {menuOption.label}
-            </Text>
-          );
-        }
-
-        return (
-          <Box key={menuOption.label} width="100%">
-            <Box flexGrow={1}>
-              <Text color={isSelected ? "white" : "gray"}>
-                {isSelected ? "› " : "  "}
-                {menuOption.label}
-              </Text>
-            </Box>
-            <Text dimColor={!isSelected}>
-              {hasValueControls
-                ? `← ${menuOption.value} →`
-                : menuOption.value}
-            </Text>
-          </Box>
-        );
-      })}
+      {menuItems.map((menuItem, index) =>
+        cloneElement<MenuItemProps>(menuItem, {
+          isSelected: index === currMenu,
+          direction,
+          menuIndex: index,
+          registerActions: (itemActions) => {
+            actions.current[index] = itemActions;
+          },
+        }),
+      )}
     </Box>
   );
 }

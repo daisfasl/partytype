@@ -14,6 +14,8 @@ export default function App() {
   >("home");
   const [practiceSettings, setPracticeSettings] = useState<PracticeSettings>({
     numWords: 30,
+    mode: "words",
+    timeLimit: 60,
   });
   const healthRequest = useCallback(
     () =>

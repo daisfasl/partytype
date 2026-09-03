@@ -2,6 +2,7 @@ import { Box, Text } from "ink";
 import Header from "../components/Header.js";
 import Footer from "../components/Footer.js";
 import Menu from "../components/Menu.js";
+import MenuItem from "../components/MenuItem.js";
 import type { Screen, ApiStatus } from "../types.js";
 
 interface HomeProps {
@@ -11,12 +12,6 @@ interface HomeProps {
 }
 
 export default function Home({ onNavigate, apiStatus, windowSize }: HomeProps) {
-  const menuOptions: { label: string; onSelect: () => void }[] = [
-    { label: "Practice Mode", onSelect: () => onNavigate("practice") },
-    { label: "Create a Party", onSelect: () => onNavigate("create-party") },
-    { label: "Join a Party", onSelect: () => onNavigate("join-party") },
-    { label: "Settings", onSelect: () => onNavigate("settings") },
-  ];
   return (
     <Box
       width="100%"
@@ -36,7 +31,21 @@ export default function Home({ onNavigate, apiStatus, windowSize }: HomeProps) {
           <Text>Welcome.</Text>
           <Text>How would you like to type?</Text>
         </Box>
-        <Menu direction="column" options={menuOptions} />
+        <Menu direction="column">
+          <MenuItem
+            label="Practice Mode"
+            onSelect={() => onNavigate("practice")}
+          />
+          <MenuItem
+            label="Create a Party"
+            onSelect={() => onNavigate("create-party")}
+          />
+          <MenuItem
+            label="Join a Party"
+            onSelect={() => onNavigate("join-party")}
+          />
+          <MenuItem label="Settings" onSelect={() => onNavigate("settings")} />
+        </Menu>
         <Footer apiStatus={apiStatus} />
       </Box>
     </Box>
