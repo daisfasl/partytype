@@ -1,4 +1,4 @@
-import { Box, Text, useStdout } from "ink";
+import { Box, Text } from "ink";
 import Header from "../components/Header.js";
 import Footer from "../components/Footer.js";
 import Menu from "../components/Menu.js";
@@ -17,14 +17,12 @@ export default function Home({ onNavigate, apiStatus }: HomeProps) {
     { label: "Join a Party", onSelect: () => onNavigate("join-party") },
     { label: "Settings", onSelect: () => onNavigate("settings") },
   ];
-  const { stdout } = useStdout();
-
   return (
     <Box
       width="100%"
       alignItems="center"
       justifyContent="center"
-      height={stdout.rows}
+      height="100%"
     >
       <Box flexDirection="column" borderStyle="round" width={60} paddingX={1}>
         <Header subtitle="version 0.1" />

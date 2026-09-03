@@ -1,4 +1,4 @@
-import { Box, useInput, useStdout } from "ink";
+import { Box, useInput } from "ink";
 import Header from "../components/Header.js";
 import Menu from "../components/Menu.js";
 import type { PracticeSettings, Screen } from "../types.js";
@@ -22,7 +22,6 @@ export default function Settings({
   onSettingsChange,
   apiStatus,
 }: SettingsProps) {
-  const { stdout } = useStdout();
   const updateWordCount = (direction: -1 | 1) => {
     const currentIndex = wordCountOptions.indexOf(settings.numWords);
     const nextIndex =
@@ -62,7 +61,7 @@ export default function Settings({
       width="100%"
       alignItems="center"
       justifyContent="center"
-      height={stdout.rows}
+      height="100%"
     >
       <Box flexDirection="column" borderStyle="round" width={60} paddingX={1}>
         <Header subtitle="Settings" />

@@ -1,4 +1,4 @@
-import { Box, useInput, useStdout } from "ink";
+import { Box, useInput } from "ink";
 import { useState } from "react";
 import Header from "../components/Header.js";
 import Footer from "../components/Footer.js";
@@ -21,7 +21,6 @@ export default function Practice({
   settings,
   apiStatus,
 }: PracticeProps) {
-  const { stdout } = useStdout();
   const [showStats, setShowStats] = useState(false);
   const { prompt, fetchPrompt } = usePracticePrompt(settings.numWords);
   const { status, typed, restart, wpm, accuracy } = useTypingEngine(prompt);
@@ -44,7 +43,7 @@ export default function Practice({
   const shouldShowStats = showStats || status === "completed";
 
   return (
-    <Box flexDirection="column" padding={1} height={stdout.rows}>
+    <Box flexDirection="column" padding={1} width="100%" height="100%">
       <Header subtitle="Practice Mode" />
       <Box flexGrow={1} flexDirection="column" justifyContent="center">
         <PracticeText prompt={prompt} typed={typed} />

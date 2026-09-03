@@ -1,11 +1,14 @@
 import { useCallback, useState } from "react";
+import { Box } from "ink";
 import Home from "./screens/Home.js";
 import Practice from "./screens/Practice.js";
 import Settings from "./screens/Settings.js";
 import { PracticeSettings, Screen } from "./types.js";
 import useApi from "./hooks/useApiStatus.js";
+import useTerminalSize from "./hooks/useTerminalSize.js";
 
 export default function App() {
+  const { columns, rows } = useTerminalSize();
   const [currentScreen, setScreen] = useState<Screen>("practice");
   const [settingsReturnScreen, setSettingsReturnScreen] = useState<
     "home" | "practice"
@@ -34,10 +37,11 @@ export default function App() {
     setScreen(screen);
   }
 
+  let screen;
   if (currentScreen === "home") {
-    return <Home onNavigate={navigateTo} apiStatus={apiStatus} />;
+    screen = <Home onNavigate={navigateTo} apiStatus={apiStatus} />;
   } else if (currentScreen === "practice") {
-    return (
+    screen = (
       <Practice
         onNavigate={navigateTo}
         settings={practiceSettings}
@@ -45,7 +49,7 @@ export default function App() {
       />
     );
   } else if (currentScreen === "settings") {
-    return (
+    screen = (
       <Settings
         onNavigate={navigateTo}
         returnTo={settingsReturnScreen}
@@ -55,4 +59,10 @@ export default function App() {
       />
     );
   }
+
+  return (
+    <Box width={columns} height={rows} flexDirection="column">
+      {screen}
+    </Box>
+  );
 }
