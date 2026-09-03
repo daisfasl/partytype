@@ -1,7 +1,7 @@
-import MenuItem from "../MenuItem.js";
+import MenuItem from "../menu/MenuItem.js";
 import cycleOption from "../../utils/cycleOption.js";
 import { useEffect } from "react";
-import type { MenuActions } from "../MenuItem.js";
+import type { MenuActions } from "../menu/MenuItem.js";
 import type { PracticeMode, PracticeSettings } from "../../types.js";
 
 const modeOptions: PracticeMode[] = ["words", "timed"];

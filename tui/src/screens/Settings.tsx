@@ -1,7 +1,7 @@
 import { Box, useInput } from "ink";
 import Header from "../components/Header.js";
-import Menu from "../components/Menu.js";
-import MenuItem from "../components/MenuItem.js";
+import Menu from "../components/menu/Menu.js";
+import MenuItem from "../components/menu/MenuItem.js";
 import ModeOption from "../components/settings/ModeOption.js";
 import TimeLimitOption from "../components/settings/TimeLimitOption.js";
 import WordCountOption from "../components/settings/WordCountOption.js";

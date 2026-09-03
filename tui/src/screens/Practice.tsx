@@ -48,7 +48,7 @@ export default function Practice({
       status === "typing" &&
       prompt.length > 0 &&
       timeLeft > 0 &&
-      typed.length >= Math.min(prompt.length, appendThreshold)
+      typed.length >= Math.max(0, prompt.length - appendThreshold)
     ) {
       appendPrompt();
     }

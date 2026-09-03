@@ -1,8 +1,8 @@
 import { Box, Text } from "ink";
 import Header from "../components/Header.js";
 import Footer from "../components/Footer.js";
-import Menu from "../components/Menu.js";
-import MenuItem from "../components/MenuItem.js";
+import Menu from "../components/menu/Menu.js";
+import MenuItem from "../components/menu/MenuItem.js";
 import type { Screen, ApiStatus } from "../types.js";
 
 interface HomeProps {

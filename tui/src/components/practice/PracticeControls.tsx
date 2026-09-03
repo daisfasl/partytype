@@ -1,6 +1,6 @@
 import { Box, useWindowSize } from "ink";
-import Menu from "../Menu.js";
-import MenuItem from "../MenuItem.js";
+import Menu from "../menu/Menu.js";
+import MenuItem from "../menu/MenuItem.js";
 
 interface PracticeControlsProps {
   onRestart: () => void;

@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import type { ReactElement, ReactNode } from "react";
-import type { MenuActions, MenuItemProps } from "./MenuItem.js";
+import type { MenuActions, MenuItemProps } from "../menu/MenuItem.js";
 
 interface MenuProps {
   children: ReactNode;

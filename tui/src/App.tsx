@@ -4,7 +4,7 @@ import Home from "./screens/Home.js";
 import Practice from "./screens/Practice.js";
 import Settings from "./screens/Settings.js";
 import { PracticeSettings, Screen } from "./types.js";
-import useApi from "./hooks/useApiStatus.js";
+import useApiStatus from "./hooks/useApiStatus.js";
 
 export default function App() {
   const windowSize = useWindowSize();
@@ -17,6 +17,7 @@ export default function App() {
     mode: "words",
     timeLimit: 60,
   });
+
   const healthRequest = useCallback(
     () =>
       fetch("http://localhost:8000/api/health").then((response) => {
@@ -26,7 +27,7 @@ export default function App() {
       }),
     [],
   );
-  const { status: apiStatus } = useApi(healthRequest);
+  const { status: apiStatus } = useApiStatus(healthRequest);
 
   function navigateTo(screen: Screen) {
     if (
