@@ -3,7 +3,7 @@ import Header from "../components/Header.js";
 import Menu from "../components/Menu.js";
 import type { PracticeSettings, Screen } from "../types.js";
 import Footer from "../components/Footer.js";
-import type { ApiStatus } from "../hooks/useApiStatus.js";
+import type { ApiStatus } from "../types.js";
 
 interface SettingsProps {
   onNavigate: (screen: Screen) => void;
