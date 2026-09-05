@@ -3,7 +3,7 @@ import Header from "../components/Header.js";
 import Footer from "../components/Footer.js";
 import Menu from "../components/Menu.js";
 import { Screen } from "../types.js";
-import type { ApiStatus } from "../hooks/useApiStatus.js";
+import type { ApiStatus } from "../types.js";
 
 interface HomeProps {
   onNavigate: (screen: Screen) => void;

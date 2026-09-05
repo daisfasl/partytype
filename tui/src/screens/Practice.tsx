@@ -8,7 +8,7 @@ import PracticeText from "../components/practice/PracticeText.js";
 import usePracticePrompt from "../hooks/usePracticePrompt.js";
 import useTypingEngine from "../hooks/useTypingEngine.js";
 import type { PracticeSettings, Screen } from "../types.js";
-import type { ApiStatus } from "../hooks/useApiStatus.js";
+import type { ApiStatus } from "../types.js";
 
 interface PracticeProps {
   onNavigate: (screen: Screen) => void;
