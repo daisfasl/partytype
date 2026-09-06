@@ -133,6 +133,7 @@ class ConnectionManager:
     # sends an payload of curr. room state to user
     async def handle_room_update(self, room: str):
         await self.broadcast(room, RoomPayload(type = "room",
+                                               room = room,
                                                mode = self.rooms[room]["mode"],
                                                status = self.rooms[room]["status"],
                                                time_setting = self.rooms[room]["time_setting"],

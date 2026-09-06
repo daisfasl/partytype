@@ -41,6 +41,7 @@ class UpdateSettingsPayload(BaseModel):
 
 class RoomPayload(BaseModel):
     type: Literal["room"]
+    room: str
     mode: Literal["time", "words", "quote"]
     status: Literal["waiting", "countdown", "active", "completed"]
     time_setting: int
