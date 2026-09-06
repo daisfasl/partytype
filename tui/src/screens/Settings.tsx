@@ -14,6 +14,7 @@ interface SettingsProps {
 }
 
 const wordCountOptions = [10, 30, 50, 100];
+const modeOptions: PracticeSettings["mode"][] = ["words", "time", "quote"];
 
 export default function Settings({
   onNavigate,
@@ -33,7 +34,23 @@ export default function Settings({
     });
   };
 
+  const updateMode = (direction: -1 | 1) => {
+    const currentIndex = modeOptions.indexOf(settings.mode);
+    const nextIndex =
+      (currentIndex + direction + modeOptions.length) % modeOptions.length;
+    onSettingsChange({
+      ...settings,
+      mode: modeOptions[nextIndex],
+    });
+  };
+
   const settingOptions = [
+    {
+      label: "Mode",
+      value: settings.mode,
+      onLeft: () => updateMode(-1),
+      onRight: () => updateMode(1),
+    },
     {
       label: "Number of words",
       value: String(settings.numWords),
@@ -42,7 +59,6 @@ export default function Settings({
     },
     { label: "Word list", value: "English", onSelect: () => {} },
     { label: "Difficulty", value: "Normal", onSelect: () => {} },
-    { label: "Mode", value: "Practice", onSelect: () => {} },
   ];
 
   useInput((input, key) => {
