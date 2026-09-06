@@ -15,7 +15,7 @@ def test_ws():
 
 def test_payloads():
    payload1 = {"type":"start",
-               "player_id":"test"}
+               "text":"the quick brown fox"}
    payload1 = TypeAdapter(Payload).validate_python(payload1)
    match payload1:
        case StartPayload():
