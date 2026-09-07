@@ -7,9 +7,15 @@ const CONFIG_PATH = join(CONFIG_DIR, "config.json");
 
 type Config = {
   displayName: string;
+  backendUrl: string;
 };
 
-const defaultConfig: Config = { displayName: "" };
+const defaultConfig: Config = {
+  displayName: "",
+  // No hosted backend yet (see ROADMAP.md Phase F) - point at a local
+  // dev server by default. Override by editing the config file directly.
+  backendUrl: "ws://localhost:8000",
+};
 
 function readConfig(): Config {
   if (!existsSync(CONFIG_PATH)) return defaultConfig;
@@ -32,4 +38,12 @@ export function getDisplayName(): string {
 
 export function setDisplayName(name: string) {
   writeConfig({ ...readConfig(), displayName: name });
+}
+
+export function getBackendUrl(): string {
+  return readConfig().backendUrl;
+}
+
+export function setBackendUrl(url: string) {
+  writeConfig({ ...readConfig(), backendUrl: url });
 }
