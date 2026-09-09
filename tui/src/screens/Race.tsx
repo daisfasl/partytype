@@ -1,0 +1,187 @@
+import { Box, Text, useInput } from "ink";
+import { useEffect, useRef, useState } from "react";
+import Header from "../components/Header.js";
+import Footer from "../components/Footer.js";
+import Menu from "../components/Menu.js";
+import PracticeText from "../components/practice/PracticeText.js";
+import { recordResult } from "../db/stats.js";
+import useTypingEngine from "../hooks/useTypingEngine.js";
+import type { UseParty } from "../hooks/useParty.js";
+import type { ApiStatus, Screen } from "../types.js";
+
+interface RaceProps {
+  onNavigate: (screen: Screen) => void;
+  apiStatus: ApiStatus;
+  party: UseParty;
+}
+
+// The server broadcasts a RoomPayload with status "countdown" up front, but
+// flips its *internal* status to "active" without a follow-up broadcast (it
+// only re-broadcasts on the next player action, e.g. a progress payload) -
+// see backend/app/game/engine.py's run_game. So the client can't just wait
+// on room.status flipping to "active"; it mirrors the server's fixed
+// 3-2-1-then-go timing locally instead, using the CountdownPayload events as
+// the clock.
+const COUNTDOWN_TO_ACTIVE_DELAY_MS = 1000;
+
+function countCompletedWords(typed: string, text: string): number {
+  if (typed.length === 0) return 0;
+  const typedPortion = text.slice(0, typed.length);
+  const words = typedPortion.split(" ");
+  const isAtEnd = typed.length === text.length;
+  return isAtEnd ? words.length : Math.max(words.length - 1, 0);
+}
+
+export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
+  const room = party.room;
+  const [countdownValue, setCountdownValue] = useState<number | null>(null);
+  const [raceActive, setRaceActive] = useState(false);
+  const [raceEnded, setRaceEnded] = useState(false);
+  const [winner, setWinner] = useState<string | null>(null);
+  const finishSentRef = useRef(false);
+
+  const text = raceActive ? (room?.text ?? "") : "";
+  const { typed, wpm, accuracy, correctChars } = useTypingEngine(text);
+
+  // Drive the countdown overlay + local active transition off lastEvent.
+  useEffect(() => {
+    if (!party.lastEvent) return;
+    if (party.lastEvent.kind === "countdown") {
+      setCountdownValue(party.lastEvent.value);
+      if (party.lastEvent.value === 1) {
+        const timer = setTimeout(() => setRaceActive(true), COUNTDOWN_TO_ACTIVE_DELAY_MS);
+        return () => clearTimeout(timer);
+      }
+    } else if (party.lastEvent.kind === "end") {
+      setWinner(party.lastEvent.winner);
+      setRaceEnded(true);
+    }
+  }, [party.lastEvent?.id]);
+
+  // Safety net: if the room's own status ever reports "active" directly
+  // (e.g. because another player's progress payload triggered a broadcast),
+  // trust it too.
+  useEffect(() => {
+    if (room?.status === "active") setRaceActive(true);
+  }, [room?.status]);
+
+  // Send progress while racing.
+  useEffect(() => {
+    if (!raceActive || raceEnded || !room) return;
+    party.send({
+      type: "progress",
+      cursor: typed.length,
+      completed_words: countCompletedWords(typed, room.text),
+      correct_chars: correctChars,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [typed]);
+
+  // Finish only makes sense for words/quote - "time" mode's buffer is sized
+  // so players shouldn't reach the end; it only ends via server timeout.
+  useEffect(() => {
+    if (!raceActive || raceEnded || !room || finishSentRef.current) return;
+    if (room.mode === "time") return;
+    if (typed.length > 0 && typed.length === room.text.length) {
+      finishSentRef.current = true;
+      party.send({ type: "finish" });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [typed]);
+
+  // Record the result once the race ends, from whatever this player's own
+  // entry in the room's player map shows at that moment.
+  useEffect(() => {
+    if (!raceEnded || !room || !party.playerId) return;
+    const me = room.players[party.playerId];
+    if (!me) return;
+    const settingValue =
+      room.mode === "words" ? room.word_count : room.mode === "time" ? room.time_setting : null;
+    recordResult(room.mode, settingValue, me.wpm, me.accuracy);
+    // Only once per race end.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [raceEnded]);
+
+  useInput((_input, key) => {
+    if (raceEnded && key.escape) {
+      onNavigate("lobby");
+    }
+  });
+
+  if (!room) {
+    return (
+      <Box width="100%" alignItems="center" justifyContent="center" height="100%">
+        <Text dimColor>Connecting...</Text>
+      </Box>
+    );
+  }
+
+  if (raceEnded) {
+    const me = party.playerId ? room.players[party.playerId] : undefined;
+    const won = winner !== null && winner === party.playerId;
+    return (
+      <Box flexDirection="column" padding={1} width="100%" height="100%">
+        <Header subtitle="Race Results" />
+        <Box flexGrow={1} flexDirection="column" alignItems="center" justifyContent="center">
+          <Text bold color={won ? "#a6e3a1" : undefined}>
+            {winner ? `Winner: ${winner}${won ? " (you!)" : ""}` : "Race over"}
+          </Text>
+          {me && (
+            <Box marginTop={1}>
+              <Text>wpm: {me.wpm}</Text>
+              <Text> accuracy: {me.accuracy}%</Text>
+            </Box>
+          )}
+          <Menu
+            direction="row"
+            options={[{ label: "Back to Lobby", onSelect: () => onNavigate("lobby") }]}
+          />
+        </Box>
+        <Footer apiStatus={apiStatus} helpText="[enter] back to lobby · [esc] back to lobby" />
+      </Box>
+    );
+  }
+
+  if (!raceActive) {
+    return (
+      <Box width="100%" alignItems="center" justifyContent="center" height="100%">
+        <Box flexDirection="column" alignItems="center">
+          <Header subtitle="Get Ready" />
+          <Box marginTop={2}>
+            <Text bold>{countdownValue ?? "..."}</Text>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  return (
+    <Box flexDirection="column" padding={1} width="100%" height="100%">
+      <Header subtitle="Race" />
+      <Box flexGrow={1} flexDirection="column" justifyContent="center">
+        <PracticeText prompt={room.text} typed={typed} />
+        <Box alignSelf="center" justifyContent="center" marginTop={1}>
+          <Text>wpm: {wpm}</Text>
+          <Text> accuracy: {accuracy}%</Text>
+        </Box>
+        <Box flexDirection="column" marginTop={1} width={60} alignSelf="center">
+          <Text dimColor>Opponents:</Text>
+          {Object.entries(room.players)
+            .filter(([id]) => id !== party.playerId)
+            .map(([id, player]) => {
+              const progress = room.text.length > 0 ? player.cursor / room.text.length : 0;
+              const barWidth = 20;
+              const filled = Math.min(barWidth, Math.round(progress * barWidth));
+              return (
+                <Text key={id}>
+                  {id.padEnd(12)} [{"#".repeat(filled)}{"-".repeat(barWidth - filled)}]{" "}
+                  {player.wpm} wpm
+                </Text>
+              );
+            })}
+        </Box>
+      </Box>
+      <Footer apiStatus={apiStatus} helpText="Type to race!" />
+    </Box>
+  );
+}
