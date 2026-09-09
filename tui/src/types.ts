@@ -5,7 +5,8 @@ export type Screen =
   | "join-party"
   | "lobby"
   | "race"
-  | "settings";
+  | "settings"
+  | "stats";
 
 export type Status = "idle" | "typing" | "completed";
 
