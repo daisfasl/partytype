@@ -54,13 +54,13 @@ export default function useTypingEngine(text: string) {
   let wpm = 0;
   let accuracy = 0;
 
+  const correctChars = typed
+    .split("")
+    .filter((char, index) => char === text[index]).length;
+
   if (startTime) {
     const currentTime = endTime || Date.now();
     const minutesElapsed = (currentTime - startTime) / 60000;
-
-    const correctChars = typed
-      .split("")
-      .filter((char, index) => char === text[index]).length;
 
     if (minutesElapsed > 0) {
       wpm = Math.round(correctChars / 5 / minutesElapsed);
@@ -71,5 +71,5 @@ export default function useTypingEngine(text: string) {
     }
   }
 
-  return { status, typed, restart, wpm, accuracy };
+  return { status, typed, restart, wpm, accuracy, correctChars };
 }
