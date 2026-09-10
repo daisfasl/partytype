@@ -15,6 +15,7 @@ export default function Home({ onNavigate, apiStatus }: HomeProps) {
     { label: "Practice Mode", onSelect: () => onNavigate("practice") },
     { label: "Create a Party", onSelect: () => onNavigate("create-party") },
     { label: "Join a Party", onSelect: () => onNavigate("join-party") },
+    { label: "Stats", onSelect: () => onNavigate("stats") },
     { label: "Settings", onSelect: () => onNavigate("settings") },
   ];
   return (
