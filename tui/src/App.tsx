@@ -5,6 +5,9 @@ import Practice from "./screens/Practice.js";
 import Settings from "./screens/Settings.js";
 import CreateParty from "./screens/CreateParty.js";
 import JoinParty from "./screens/JoinParty.js";
+import Lobby from "./screens/Lobby.js";
+import Race from "./screens/Race.js";
+import Stats from "./screens/Stats.js";
 import { PracticeSettings, Screen } from "./types.js";
 import useApi from "./hooks/useApiStatus.js";
 import useParty from "./hooks/useParty.js";
@@ -69,6 +72,16 @@ export default function App() {
     screen = (
       <JoinParty onNavigate={navigateTo} apiStatus={apiStatus} party={party} />
     );
+  } else if (currentScreen === "lobby") {
+    screen = (
+      <Lobby onNavigate={navigateTo} apiStatus={apiStatus} party={party} />
+    );
+  } else if (currentScreen === "race") {
+    screen = (
+      <Race onNavigate={navigateTo} apiStatus={apiStatus} party={party} />
+    );
+  } else if (currentScreen === "stats") {
+    screen = <Stats onNavigate={navigateTo} apiStatus={apiStatus} />;
   } else if (currentScreen === "settings") {
     screen = (
       <Settings
