@@ -28,6 +28,14 @@ export function recordResult(
   const db = getDb();
   const existing = getBest(mode, settingValue);
 
+  // Every completed test gets logged here regardless of whether it's a
+  // personal best - this is a full history, not just bests.
+  db.run(
+    `INSERT INTO test_history (completed_at, mode, wpm, accuracy)
+     VALUES (?, ?, ?, ?)`,
+    [new Date().toISOString(), mode, wpm, accuracy],
+  );
+
   if (existing && existing.wpm >= wpm) return;
 
   if (existing) {
@@ -43,4 +51,33 @@ export function recordResult(
       [mode, settingValue, wpm, accuracy],
     );
   }
+}
+
+export function getTotalTestsCompleted(): number {
+  const db = getDb();
+  const row = db.query(`SELECT COUNT(*) as count FROM test_history`).get() as {
+    count: number;
+  };
+  return row.count;
+}
+
+export interface ActivityDay {
+  date: string;
+  count: number;
+}
+
+// Tests per UTC calendar day for the last `days` days. Only returns days
+// that have at least one test - the caller fills in gaps (see
+// buildActivityGrid in activityGrid.ts).
+export function getActivity(days: number): ActivityDay[] {
+  const db = getDb();
+  const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+  return db
+    .query(
+      `SELECT date(completed_at) as date, COUNT(*) as count
+       FROM test_history
+       WHERE completed_at >= ?
+       GROUP BY date(completed_at)`,
+    )
+    .all(cutoff) as ActivityDay[];
 }
