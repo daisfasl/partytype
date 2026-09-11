@@ -3,7 +3,11 @@ import { useEffect } from "react";
 import Header from "../components/Header.js";
 import Footer from "../components/Footer.js";
 import Menu from "../components/Menu.js";
-import { generateText, TIME_MODE_WORD_BUFFER } from "../db/textGeneration.js";
+import {
+  generateText,
+  getAvailableLanguages,
+  TIME_MODE_WORD_BUFFER,
+} from "../db/textGeneration.js";
 import type { UseParty } from "../hooks/useParty.js";
 import type { ApiStatus, GameMode, Screen } from "../types.js";
 
@@ -16,6 +20,7 @@ interface LobbyProps {
 const MODE_OPTIONS: GameMode[] = ["time", "words", "quote"];
 const WORD_COUNT_OPTIONS = [10, 25, 50, 100, 200];
 const TIME_SETTING_OPTIONS = [15, 30, 60, 120, 300];
+const LANGUAGE_OPTIONS = getAvailableLanguages();
 
 export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
   const room = party.room;
@@ -34,7 +39,12 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
     onNavigate("home");
   };
 
-  const sendSettings = (next: { mode: GameMode; time_setting: number; word_count: number }) => {
+  const sendSettings = (next: {
+    mode: GameMode;
+    time_setting: number;
+    word_count: number;
+    language: string;
+  }) => {
     party.send({ type: "settings", ...next });
   };
 
@@ -46,6 +56,7 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
       mode: MODE_OPTIONS[nextIndex],
       time_setting: room.time_setting,
       word_count: room.word_count,
+      language: room.language,
     });
   };
 
@@ -59,6 +70,7 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
       mode: room.mode,
       time_setting: room.time_setting,
       word_count: WORD_COUNT_OPTIONS[nextIndex],
+      language: room.language,
     });
   };
 
@@ -72,6 +84,21 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
       mode: room.mode,
       time_setting: TIME_SETTING_OPTIONS[nextIndex],
       word_count: room.word_count,
+      language: room.language,
+    });
+  };
+
+  const cycleLanguage = (direction: -1 | 1) => {
+    if (!room) return;
+    const currentIndex = LANGUAGE_OPTIONS.indexOf(room.language);
+    const nextIndex =
+      (currentIndex === -1 ? 0 : currentIndex + direction + LANGUAGE_OPTIONS.length) %
+      LANGUAGE_OPTIONS.length;
+    sendSettings({
+      mode: room.mode,
+      time_setting: room.time_setting,
+      word_count: room.word_count,
+      language: LANGUAGE_OPTIONS[nextIndex],
     });
   };
 
@@ -79,10 +106,10 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
     if (!room) return;
     const text =
       room.mode === "quote"
-        ? generateText("quote", 0)
+        ? generateText("quote", 0, room.language)
         : room.mode === "words"
-          ? generateText("words", room.word_count)
-          : generateText("time", TIME_MODE_WORD_BUFFER);
+          ? generateText("words", room.word_count, room.language)
+          : generateText("time", TIME_MODE_WORD_BUFFER, room.language);
     party.send({ type: "start", text });
   };
 
@@ -133,6 +160,12 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
           },
         ]
       : []),
+    {
+      label: "Language",
+      value: room.language,
+      onLeft: () => cycleLanguage(-1),
+      onRight: () => cycleLanguage(1),
+    },
     { label: "Start Race", onSelect: handleStart },
     { label: "Leave", onSelect: handleLeave },
   ];
@@ -169,6 +202,7 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
               Mode: {room.mode}
               {room.mode === "words" && ` · ${room.word_count} words`}
               {room.mode === "time" && ` · ${room.time_setting}s`}
+              {` · ${room.language}`}
             </Text>
             <Text dimColor>Waiting for host to start...</Text>
           </Box>
