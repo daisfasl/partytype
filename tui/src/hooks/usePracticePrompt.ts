@@ -14,13 +14,13 @@ export default function usePracticePrompt(settings: PracticeSettings) {
 
   const fetchPrompt = useCallback(() => {
     if (settings.mode === "quote") {
-      setPrompt(generateText("quote", 0));
+      setPrompt(generateText("quote", 0, settings.language));
     } else if (settings.mode === "time") {
-      setPrompt(generateText("time", INITIAL_TIME_CHUNK));
+      setPrompt(generateText("time", INITIAL_TIME_CHUNK, settings.language));
     } else {
-      setPrompt(generateText("words", settings.numWords));
+      setPrompt(generateText("words", settings.numWords, settings.language));
     }
-  }, [settings.mode, settings.numWords]);
+  }, [settings.mode, settings.numWords, settings.language]);
 
   useEffect(() => {
     fetchPrompt();
@@ -35,10 +35,10 @@ export default function usePracticePrompt(settings: PracticeSettings) {
         if (current.length - typedLength > TIME_EXTEND_THRESHOLD) {
           return current;
         }
-        return `${current} ${generateMoreWords(TIME_EXTEND_CHUNK)}`;
+        return `${current} ${generateMoreWords(TIME_EXTEND_CHUNK, settings.language)}`;
       });
     },
-    [settings.mode],
+    [settings.mode, settings.language],
   );
 
   return { prompt, fetchPrompt, extendIfNeeded };
