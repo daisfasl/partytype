@@ -4,6 +4,7 @@ import Menu from "../components/Menu.js";
 import type { PracticeSettings, Screen } from "../types.js";
 import Footer from "../components/Footer.js";
 import type { ApiStatus } from "../types.js";
+import { getAvailableLanguages } from "../db/textGeneration.js";
 
 interface SettingsProps {
   onNavigate: (screen: Screen) => void;
@@ -15,6 +16,7 @@ interface SettingsProps {
 
 const wordCountOptions = [10, 30, 50, 100];
 const modeOptions: PracticeSettings["mode"][] = ["words", "time", "quote"];
+const languageOptions = getAvailableLanguages();
 
 export default function Settings({
   onNavigate,
@@ -44,6 +46,17 @@ export default function Settings({
     });
   };
 
+  const updateLanguage = (direction: -1 | 1) => {
+    const currentIndex = languageOptions.indexOf(settings.language);
+    const nextIndex =
+      (currentIndex === -1 ? 0 : currentIndex + direction + languageOptions.length) %
+      languageOptions.length;
+    onSettingsChange({
+      ...settings,
+      language: languageOptions[nextIndex],
+    });
+  };
+
   const settingOptions = [
     {
       label: "Mode",
@@ -57,7 +70,12 @@ export default function Settings({
       onLeft: () => updateWordCount(-1),
       onRight: () => updateWordCount(1),
     },
-    { label: "Word list", value: "English", onSelect: () => {} },
+    {
+      label: "Word list",
+      value: settings.language,
+      onLeft: () => updateLanguage(-1),
+      onRight: () => updateLanguage(1),
+    },
     { label: "Difficulty", value: "Normal", onSelect: () => {} },
   ];
 

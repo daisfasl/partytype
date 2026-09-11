@@ -13,6 +13,7 @@ export type Status = "idle" | "typing" | "completed";
 export type PracticeSettings = {
   numWords: number;
   mode: "words" | "time" | "quote";
+  language: string;
 };
 
 export type ApiStatus = "loading" | "online" | "offline";
@@ -57,6 +58,7 @@ export interface UpdateSettingsPayload {
   mode: GameMode;
   time_setting: number; // 15-300 seconds, only meaningful in "time" mode
   word_count: number; // 10-200, only meaningful in "words" mode
+  language: string;
 }
 
 // Server -> Players
@@ -67,6 +69,7 @@ export interface RoomPayload {
   status: RoomStatus;
   time_setting: number;
   word_count: number;
+  language: string;
   text: string;
   players: Record<string, Player>;
   host: string;
