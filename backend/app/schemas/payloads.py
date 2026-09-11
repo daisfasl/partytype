@@ -33,6 +33,7 @@ class UpdateSettingsPayload(BaseModel):
     mode: Literal["time", "words", "quote"]
     time_setting: int = Field(ge = 15, le = 300)
     word_count: int = Field(ge = 10, le = 200)
+    language: str
 
 # ------------------------- 
 # ------------------------- Server -> Players
@@ -46,6 +47,7 @@ class RoomPayload(BaseModel):
     status: Literal["waiting", "countdown", "active", "completed"]
     time_setting: int
     word_count: int
+    language: str
     text: str
     players: dict[str, Player]
     host: str
