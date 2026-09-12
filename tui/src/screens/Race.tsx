@@ -9,7 +9,7 @@ import { formatTime, getModeSettingValue } from "../gameMode.js";
 import useCountdown from "../hooks/useCountdown.js";
 import useTypingEngine from "../hooks/useTypingEngine.js";
 import type { UseParty } from "../hooks/useParty.js";
-import type { ApiStatus, Screen } from "../types.js";
+import type { ApiStatus, LeaderboardEntry, Screen } from "../types.js";
 import Gradient from "ink-gradient";
 
 interface RaceProps {
@@ -41,7 +41,7 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
   const [raceActive, setRaceActive] = useState(false);
   const [raceStartTime, setRaceStartTime] = useState<number | null>(null);
   const [raceEnded, setRaceEnded] = useState(false);
-  const [winner, setWinner] = useState<string | null>(null);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[] | null>(null);
   const finishSentRef = useRef(false);
 
   const text = raceActive ? (room?.text ?? "") : "";
@@ -75,7 +75,7 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
         return () => clearTimeout(timer);
       }
     } else if (party.lastEvent.kind === "end") {
-      setWinner(party.lastEvent.winner);
+      setLeaderboard(party.lastEvent.leaderboard);
       setRaceEnded(true);
     }
   }, [party.lastEvent?.id]);
@@ -101,6 +101,11 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
 
   // Finish only makes sense for words/quote - "time" mode's buffer is sized
   // so players shouldn't reach the end; it only ends via server timeout.
+  // Matching length is enough to finish even with mistakes remaining -
+  // players should be able to complete the race despite typos, same as solo
+  // Practice. This is safe from a "mash garbage to finish fast" incentive
+  // because the leaderboard ranks by final wpm, not by who finished first -
+  // a low-accuracy sprint to the end just won't rank well.
   useEffect(() => {
     if (!raceActive || raceEnded || !room || finishSentRef.current) return;
     if (room.mode === "time") return;
@@ -147,24 +152,38 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
   }
 
   if (raceEnded) {
-    const me = party.playerId ? room.players[party.playerId] : undefined;
-    const won = winner !== null && winner === party.playerId;
+    const winnerEntry = leaderboard?.[0] ?? null;
+    const iWon = winnerEntry !== null && winnerEntry.player_id === party.playerId;
     return (
       <Box flexDirection="column" padding={1} width="100%" height="100%">
         <Header subtitle="Race Results" />
-        <Box
-          flexGrow={1}
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <Text bold color={won ? "#a6e3a1" : undefined}>
-            {winner ? `Winner: ${winner}${won ? " (you!)" : ""}` : "Race over"}
+        <Box flexGrow={1} flexDirection="column" alignItems="center" justifyContent="center">
+          <Text bold color={iWon ? "#a6e3a1" : undefined}>
+            {winnerEntry
+              ? `Winner: ${winnerEntry.player_id}${iWon ? " (you!)" : ""}`
+              : "Race over"}
           </Text>
-          {me && (
-            <Box marginTop={1}>
-              <Text>wpm: {me.wpm}</Text>
-              <Text> accuracy: {me.accuracy}%</Text>
+          {leaderboard && (
+            <Box flexDirection="column" marginTop={1} width={60}>
+              <Text dimColor>
+                {"Rank".padEnd(6)}
+                {"Player".padEnd(14)}
+                {"WPM".padEnd(6)}
+                {"Acc".padEnd(6)}
+                Status
+              </Text>
+              {leaderboard.map((entry) => {
+                const isMe = entry.player_id === party.playerId;
+                return (
+                  <Text key={entry.player_id} color={isMe ? "#a6e3a1" : undefined}>
+                    {`#${entry.rank}`.padEnd(6)}
+                    {entry.player_id.padEnd(14)}
+                    {String(entry.wpm).padEnd(6)}
+                    {`${entry.accuracy}%`.padEnd(6)}
+                    {entry.finished ? "finished" : "did not finish"}
+                  </Text>
+                );
+              })}
             </Box>
           )}
           <Menu
@@ -203,6 +222,8 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
     );
   }
 
+  const iHaveFinished = party.playerId ? (room.players[party.playerId]?.finished ?? false) : false;
+
   return (
     <Box flexDirection="column" padding={1} width="100%" height="100%">
       <Header subtitle="Race" />
@@ -223,18 +244,26 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
           <Text>wpm: {wpm}</Text>
           <Text> accuracy: {accuracy}%</Text>
         </Box>
+        {iHaveFinished && (
+          <Box alignSelf="center" marginTop={1}>
+            <Text dimColor>Waiting for others to finish...</Text>
+          </Box>
+        )}
         <Box flexDirection="column" marginTop={1} width={60} alignSelf="center">
           <Text dimColor>Opponents:</Text>
           {Object.entries(room.players)
             .filter(([id]) => id !== party.playerId)
             .map(([id, player]) => {
-              const progress =
-                room.text.length > 0 ? player.cursor / room.text.length : 0;
               const barWidth = 20;
-              const filled = Math.min(
-                barWidth,
-                Math.round(progress * barWidth),
-              );
+              if (player.finished) {
+                return (
+                  <Text key={id} color="#a6e3a1">
+                    {id.padEnd(12)} [{"#".repeat(barWidth)}] {player.wpm} wpm - done
+                  </Text>
+                );
+              }
+              const progress = room.text.length > 0 ? player.cursor / room.text.length : 0;
+              const filled = Math.min(barWidth, Math.round(progress * barWidth));
               return (
                 <Text key={id}>
                   {id.padEnd(12)} [{"#".repeat(filled)}
@@ -244,7 +273,10 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
             })}
         </Box>
       </Box>
-      <Footer apiStatus={apiStatus} helpText="Type to race!" />
+      <Footer
+        apiStatus={apiStatus}
+        helpText={iHaveFinished ? "Waiting for other racers to finish..." : "Type to race!"}
+      />
     </Box>
   );
 }

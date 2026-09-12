@@ -11,7 +11,7 @@
 import { useCallback, useRef, useState } from "react";
 import { getBackendUrl } from "../config.js";
 import { createPartySocket, joinPartySocket, PartySocket } from "../services/socket.js";
-import type { ClientPayload, RoomPayload, ServerPayload } from "../types.js";
+import type { ClientPayload, LeaderboardEntry, RoomPayload, ServerPayload } from "../types.js";
 
 export type PartyConnectionStatus =
   | "idle" // no connection attempted yet (or explicitly left)
@@ -30,7 +30,7 @@ export type PartyConnectionStatus =
  */
 export type PartyEvent =
   | { id: number; kind: "countdown"; value: number }
-  | { id: number; kind: "end"; winner: string }
+  | { id: number; kind: "end"; leaderboard: LeaderboardEntry[] }
   | { id: number; kind: "error"; message: string }
   | { id: number; kind: "message"; sender: "user" | "server"; message: string };
 
@@ -103,7 +103,7 @@ export default function useParty(): UseParty {
           setLastEvent({ id: nextId(), kind: "countdown", value: payload.value });
           break;
         case "end":
-          setLastEvent({ id: nextId(), kind: "end", winner: payload.winner });
+          setLastEvent({ id: nextId(), kind: "end", leaderboard: payload.leaderboard });
           break;
         case "error":
           setLastEvent({ id: nextId(), kind: "error", message: payload.message });

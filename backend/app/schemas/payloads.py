@@ -11,6 +11,7 @@ class Player(TypedDict):
     wpm: float
     correct_chars: int
     accuracy: float
+    finished: bool
 
 # -------------------------
 # ------------------------- Players -> Server
@@ -56,9 +57,16 @@ class CountdownPayload(BaseModel):
     type: Literal["countdown"]
     value: int = Field(ge = 1, le = 3) # int 1, 2, or 3
 
+class LeaderboardEntry(BaseModel):
+    player_id: str
+    wpm: float
+    accuracy: float
+    rank: int
+    finished: bool
+
 class GameEndPayload(BaseModel):
     type: Literal["end"]
-    winner: str
+    leaderboard: list[LeaderboardEntry]
 
 class ErrorPayload(BaseModel):
     type: Literal["error"]

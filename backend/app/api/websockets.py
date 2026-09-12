@@ -4,6 +4,7 @@ from pydantic import ValidationError, TypeAdapter
 from app.schemas.payloads import *
 import asyncio
 import json
+import time
 
 websockets_router = APIRouter()
 
@@ -34,6 +35,8 @@ async def game_loop(ws: WebSocket, player_id: str, room_id: str):
                 case ProgressPayload():
                     await manager.handle_progress(room_id, payload,player_id)
                 case MessagePayload():
+                    if room_id in manager.rooms:
+                        manager.rooms[room_id]["last_activity"] = time.perf_counter()
                     await manager.broadcast(room_id, payload)
                 case FinishPayload():
                     await manager.handle_player_finish(room_id, player_id)

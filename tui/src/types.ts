@@ -36,6 +36,7 @@ export interface Player {
   wpm: number;
   correct_chars: number;
   accuracy: number;
+  finished: boolean;
 }
 
 // Players -> Server
@@ -82,9 +83,17 @@ export interface CountdownPayload {
   value: 1 | 2 | 3;
 }
 
+export interface LeaderboardEntry {
+  player_id: string;
+  wpm: number;
+  accuracy: number;
+  rank: number; // 1-indexed; finishers ranked by finish order, then non-finishers by wpm desc
+  finished: boolean;
+}
+
 export interface GameEndPayload {
   type: "end";
-  winner: string;
+  leaderboard: LeaderboardEntry[];
 }
 
 export interface ErrorPayload {

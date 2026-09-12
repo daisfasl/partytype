@@ -2,11 +2,18 @@ import { useEffect, useState } from "react";
 import { Status } from "../types.js";
 import { useInput } from "ink";
 
+// Below this elapsed time, correctChars/5/minutesElapsed blows up toward
+// infinity for a fraction of a second right as typing starts (e.g. 1 correct
+// char after 20ms elapsed is ~2400wpm). Hold wpm at 0 until enough time has
+// passed for the number to mean anything.
+const MIN_ELAPSED_MINUTES_FOR_WPM = 1 / 60; // 1 second
+
 export default function useTypingEngine(text: string, durationMs?: number) {
   const [status, setStatus] = useState<Status>("idle");
   const [typed, setTyped] = useState<string>("");
   const [startTime, setStartTime] = useState<number | null>(null);
   const [endTime, setEndTime] = useState<number | null>(null);
+  const [now, setNow] = useState(Date.now());
   const restart = () => {
     setTyped("");
     setStatus("idle");
@@ -29,6 +36,14 @@ export default function useTypingEngine(text: string, durationMs?: number) {
     );
     return () => clearTimeout(timer);
   }, [durationMs, status, startTime]);
+
+  // Ticks while typing so wpm/accuracy update live between keystrokes too,
+  // not just when a new character triggers a render.
+  useEffect(() => {
+    if (status !== "typing") return;
+    const interval = setInterval(() => setNow(Date.now()), 200);
+    return () => clearInterval(interval);
+  }, [status]);
 
   useInput((input, key) => {
     if (status === "completed") return;
@@ -75,10 +90,10 @@ export default function useTypingEngine(text: string, durationMs?: number) {
     .filter((char, index) => char === text[index]).length;
 
   if (startTime) {
-    const currentTime = endTime || Date.now();
+    const currentTime = endTime || now;
     const minutesElapsed = (currentTime - startTime) / 60000;
 
-    if (minutesElapsed > 0) {
+    if (minutesElapsed >= MIN_ELAPSED_MINUTES_FOR_WPM) {
       wpm = Math.round(correctChars / 5 / minutesElapsed);
     }
 
