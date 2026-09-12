@@ -5,10 +5,12 @@ import Footer from "../components/Footer.js";
 import Menu from "../components/Menu.js";
 import PracticeText from "../components/practice/PracticeText.js";
 import { recordResult } from "../db/stats.js";
-import { getModeSettingValue } from "../gameMode.js";
+import { formatTime, getModeSettingValue } from "../gameMode.js";
+import useCountdown from "../hooks/useCountdown.js";
 import useTypingEngine from "../hooks/useTypingEngine.js";
 import type { UseParty } from "../hooks/useParty.js";
 import type { ApiStatus, Screen } from "../types.js";
+import Gradient from "ink-gradient";
 
 interface RaceProps {
   onNavigate: (screen: Screen) => void;
@@ -37,6 +39,7 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
   const room = party.room;
   const [countdownValue, setCountdownValue] = useState<number | null>(null);
   const [raceActive, setRaceActive] = useState(false);
+  const [raceStartTime, setRaceStartTime] = useState<number | null>(null);
   const [raceEnded, setRaceEnded] = useState(false);
   const [winner, setWinner] = useState<string | null>(null);
   const finishSentRef = useRef(false);
@@ -44,16 +47,31 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
   const text = raceActive ? (room?.text ?? "") : "";
   const { typed, wpm, accuracy, correctChars } = useTypingEngine(text);
 
+  // "time" mode ends on the server's fixed time_setting clock, started the
+  // moment the race goes active for everyone - mirrored locally the same way
+  // Practice tracks its own wall-clock timer, but keyed off raceActive
+  const durationMs =
+    room?.mode === "time" ? room.time_setting * 1000 : undefined;
+  const remainingSecondsOrNull = useCountdown({
+    durationMs,
+    startTime: raceStartTime,
+    isDone: raceEnded,
+  });
+  const remainingSeconds =
+    remainingSecondsOrNull ?? (room ? room.time_setting : 0);
+
+  const goActive = () => {
+    setRaceActive(true);
+    setRaceStartTime((current) => current ?? Date.now());
+  };
+
   // Drive the countdown overlay + local active transition off lastEvent.
   useEffect(() => {
     if (!party.lastEvent) return;
     if (party.lastEvent.kind === "countdown") {
       setCountdownValue(party.lastEvent.value);
       if (party.lastEvent.value === 1) {
-        const timer = setTimeout(
-          () => setRaceActive(true),
-          COUNTDOWN_TO_ACTIVE_DELAY_MS,
-        );
+        const timer = setTimeout(goActive, COUNTDOWN_TO_ACTIVE_DELAY_MS);
         return () => clearTimeout(timer);
       }
     } else if (party.lastEvent.kind === "end") {
@@ -66,7 +84,7 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
   // (e.g. because another player's progress payload triggered a broadcast),
   // trust it too.
   useEffect(() => {
-    if (room?.status === "active") setRaceActive(true);
+    if (room?.status === "active") goActive();
   }, [room?.status]);
 
   // Send progress while racing.
@@ -189,7 +207,18 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
     <Box flexDirection="column" padding={1} width="100%" height="100%">
       <Header subtitle="Race" />
       <Box flexGrow={1} flexDirection="column" justifyContent="center">
-        <PracticeText prompt={room.text} typed={typed} />
+        {room.mode === "time" && (
+          <Box width={60} alignSelf="center">
+            <Gradient name="pastel">
+              <Text>Time: {formatTime(remainingSeconds)}</Text>
+            </Gradient>
+          </Box>
+        )}
+        <PracticeText
+          prompt={room.text}
+          typed={typed}
+          visibleLines={room.mode === "time" ? 4 : undefined}
+        />
         <Box alignSelf="center" justifyContent="center" marginTop={1}>
           <Text>wpm: {wpm}</Text>
           <Text> accuracy: {accuracy}%</Text>

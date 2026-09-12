@@ -5,7 +5,7 @@ import Footer from "../components/Footer.js";
 import PracticeControls from "../components/practice/PracticeControls.js";
 import PracticeStats from "../components/practice/PracticeStats.js";
 import PracticeText from "../components/practice/PracticeText.js";
-import { getModeSettingValue } from "../gameMode.js";
+import { formatTime, getModeSettingValue } from "../gameMode.js";
 import useCountdown from "../hooks/useCountdown.js";
 import usePracticePrompt from "../hooks/usePracticePrompt.js";
 import useRecordResult from "../hooks/useRecordResult.js";
@@ -13,13 +13,6 @@ import useTypingEngine from "../hooks/useTypingEngine.js";
 import type { PracticeSettings, Screen } from "../types.js";
 import type { ApiStatus } from "../types.js";
 import Gradient from "ink-gradient";
-
-function formatTime(totalSeconds: number): string {
-  if (totalSeconds < 60) return String(totalSeconds);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${minutes}:${String(seconds).padStart(2, "0")}`;
-}
 
 interface PracticeProps {
   onNavigate: (screen: Screen) => void;
