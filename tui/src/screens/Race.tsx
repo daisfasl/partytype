@@ -7,7 +7,7 @@ import PracticeText from "../components/practice/PracticeText.js";
 import { recordResult } from "../db/stats.js";
 import useTypingEngine from "../hooks/useTypingEngine.js";
 import type { UseParty } from "../hooks/useParty.js";
-import type { ApiStatus, Screen } from "../types.js";
+import type { ApiStatus, LeaderboardEntry, Screen } from "../types.js";
 
 interface RaceProps {
   onNavigate: (screen: Screen) => void;
@@ -37,7 +37,7 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
   const [countdownValue, setCountdownValue] = useState<number | null>(null);
   const [raceActive, setRaceActive] = useState(false);
   const [raceEnded, setRaceEnded] = useState(false);
-  const [winner, setWinner] = useState<string | null>(null);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[] | null>(null);
   const finishSentRef = useRef(false);
 
   const text = raceActive ? (room?.text ?? "") : "";
@@ -53,7 +53,7 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
         return () => clearTimeout(timer);
       }
     } else if (party.lastEvent.kind === "end") {
-      setWinner(party.lastEvent.winner);
+      setLeaderboard(party.lastEvent.leaderboard);
       setRaceEnded(true);
     }
   }, [party.lastEvent?.id]);
@@ -117,19 +117,38 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
   }
 
   if (raceEnded) {
-    const me = party.playerId ? room.players[party.playerId] : undefined;
-    const won = winner !== null && winner === party.playerId;
+    const winnerEntry = leaderboard?.[0] ?? null;
+    const iWon = winnerEntry !== null && winnerEntry.player_id === party.playerId;
     return (
       <Box flexDirection="column" padding={1} width="100%" height="100%">
         <Header subtitle="Race Results" />
         <Box flexGrow={1} flexDirection="column" alignItems="center" justifyContent="center">
-          <Text bold color={won ? "#a6e3a1" : undefined}>
-            {winner ? `Winner: ${winner}${won ? " (you!)" : ""}` : "Race over"}
+          <Text bold color={iWon ? "#a6e3a1" : undefined}>
+            {winnerEntry
+              ? `Winner: ${winnerEntry.player_id}${iWon ? " (you!)" : ""}`
+              : "Race over"}
           </Text>
-          {me && (
-            <Box marginTop={1}>
-              <Text>wpm: {me.wpm}</Text>
-              <Text> accuracy: {me.accuracy}%</Text>
+          {leaderboard && (
+            <Box flexDirection="column" marginTop={1} width={60}>
+              <Text dimColor>
+                {"Rank".padEnd(6)}
+                {"Player".padEnd(14)}
+                {"WPM".padEnd(6)}
+                {"Acc".padEnd(6)}
+                Status
+              </Text>
+              {leaderboard.map((entry) => {
+                const isMe = entry.player_id === party.playerId;
+                return (
+                  <Text key={entry.player_id} color={isMe ? "#a6e3a1" : undefined}>
+                    {`#${entry.rank}`.padEnd(6)}
+                    {entry.player_id.padEnd(14)}
+                    {String(entry.wpm).padEnd(6)}
+                    {`${entry.accuracy}%`.padEnd(6)}
+                    {entry.finished ? "finished" : "did not finish"}
+                  </Text>
+                );
+              })}
             </Box>
           )}
           <Menu
@@ -155,6 +174,8 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
     );
   }
 
+  const iHaveFinished = party.playerId ? (room.players[party.playerId]?.finished ?? false) : false;
+
   return (
     <Box flexDirection="column" padding={1} width="100%" height="100%">
       <Header subtitle="Race" />
@@ -164,13 +185,25 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
           <Text>wpm: {wpm}</Text>
           <Text> accuracy: {accuracy}%</Text>
         </Box>
+        {iHaveFinished && (
+          <Box alignSelf="center" marginTop={1}>
+            <Text dimColor>Waiting for others to finish...</Text>
+          </Box>
+        )}
         <Box flexDirection="column" marginTop={1} width={60} alignSelf="center">
           <Text dimColor>Opponents:</Text>
           {Object.entries(room.players)
             .filter(([id]) => id !== party.playerId)
             .map(([id, player]) => {
-              const progress = room.text.length > 0 ? player.cursor / room.text.length : 0;
               const barWidth = 20;
+              if (player.finished) {
+                return (
+                  <Text key={id} color="#a6e3a1">
+                    {id.padEnd(12)} [{"#".repeat(barWidth)}] {player.wpm} wpm - done
+                  </Text>
+                );
+              }
+              const progress = room.text.length > 0 ? player.cursor / room.text.length : 0;
               const filled = Math.min(barWidth, Math.round(progress * barWidth));
               return (
                 <Text key={id}>
@@ -181,7 +214,10 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
             })}
         </Box>
       </Box>
-      <Footer apiStatus={apiStatus} helpText="Type to race!" />
+      <Footer
+        apiStatus={apiStatus}
+        helpText={iHaveFinished ? "Waiting for other racers to finish..." : "Type to race!"}
+      />
     </Box>
   );
 }
