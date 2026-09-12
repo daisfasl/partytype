@@ -88,7 +88,6 @@ export default function Settings({
       value: settings.language,
       onSelect: () => onNavigate("language-select"),
     },
-    { label: "Difficulty", value: "Normal", onSelect: () => {} },
   ];
 
   useInput((input, key) => {
