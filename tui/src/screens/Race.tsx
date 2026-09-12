@@ -49,7 +49,10 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
     if (party.lastEvent.kind === "countdown") {
       setCountdownValue(party.lastEvent.value);
       if (party.lastEvent.value === 1) {
-        const timer = setTimeout(() => setRaceActive(true), COUNTDOWN_TO_ACTIVE_DELAY_MS);
+        const timer = setTimeout(
+          () => setRaceActive(true),
+          COUNTDOWN_TO_ACTIVE_DELAY_MS,
+        );
         return () => clearTimeout(timer);
       }
     } else if (party.lastEvent.kind === "end") {
@@ -96,7 +99,11 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
     const me = room.players[party.playerId];
     if (!me) return;
     const settingValue =
-      room.mode === "words" ? room.word_count : room.mode === "time" ? room.time_setting : null;
+      room.mode === "words"
+        ? room.word_count
+        : room.mode === "time"
+          ? room.time_setting
+          : null;
     recordResult(room.mode, settingValue, me.wpm, me.accuracy);
     // Only once per race end.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -110,7 +117,12 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
 
   if (!room) {
     return (
-      <Box width="100%" alignItems="center" justifyContent="center" height="100%">
+      <Box
+        width="100%"
+        alignItems="center"
+        justifyContent="center"
+        height="100%"
+      >
         <Text dimColor>Connecting...</Text>
       </Box>
     );
@@ -122,7 +134,12 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
     return (
       <Box flexDirection="column" padding={1} width="100%" height="100%">
         <Header subtitle="Race Results" />
-        <Box flexGrow={1} flexDirection="column" alignItems="center" justifyContent="center">
+        <Box
+          flexGrow={1}
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+        >
           <Text bold color={won ? "#a6e3a1" : undefined}>
             {winner ? `Winner: ${winner}${won ? " (you!)" : ""}` : "Race over"}
           </Text>
@@ -134,19 +151,32 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
           )}
           <Menu
             direction="row"
-            options={[{ label: "Back to Lobby", onSelect: () => onNavigate("lobby") }]}
+            options={[
+              { label: "Back to Lobby", onSelect: () => onNavigate("lobby") },
+            ]}
           />
         </Box>
-        <Footer apiStatus={apiStatus} helpText="[enter] back to lobby · [esc] back to lobby" />
+        <Footer
+          apiStatus={apiStatus}
+          helpText="[enter] back to lobby · [esc] back to lobby"
+        />
       </Box>
     );
   }
 
   if (!raceActive) {
     return (
-      <Box width="100%" alignItems="center" justifyContent="center" height="100%">
+      <Box
+        width="100%"
+        alignItems="center"
+        justifyContent="center"
+        height="100%"
+      >
         <Box flexDirection="column" alignItems="center">
-          <Header subtitle="Get Ready" />
+          <Box flexDirection="column" gap={1} width="100%">
+            <Header />
+            <Text dimColor>Get Ready</Text>
+          </Box>
           <Box marginTop={2}>
             <Text bold>{countdownValue ?? "..."}</Text>
           </Box>
@@ -169,13 +199,17 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
           {Object.entries(room.players)
             .filter(([id]) => id !== party.playerId)
             .map(([id, player]) => {
-              const progress = room.text.length > 0 ? player.cursor / room.text.length : 0;
+              const progress =
+                room.text.length > 0 ? player.cursor / room.text.length : 0;
               const barWidth = 20;
-              const filled = Math.min(barWidth, Math.round(progress * barWidth));
+              const filled = Math.min(
+                barWidth,
+                Math.round(progress * barWidth),
+              );
               return (
                 <Text key={id}>
-                  {id.padEnd(12)} [{"#".repeat(filled)}{"-".repeat(barWidth - filled)}]{" "}
-                  {player.wpm} wpm
+                  {id.padEnd(12)} [{"#".repeat(filled)}
+                  {"-".repeat(barWidth - filled)}] {player.wpm} wpm
                 </Text>
               );
             })}

@@ -8,6 +8,7 @@ import JoinParty from "./screens/JoinParty.js";
 import Lobby from "./screens/Lobby.js";
 import Race from "./screens/Race.js";
 import Stats from "./screens/Stats.js";
+import LanguageSelect from "./screens/LanguageSelect.js";
 import { PracticeSettings, Screen } from "./types.js";
 import useApi from "./hooks/useApiStatus.js";
 import useParty from "./hooks/useParty.js";
@@ -15,7 +16,7 @@ import useTerminalSize from "./hooks/useTerminalSize.js";
 
 export default function App() {
   const { columns, rows } = useTerminalSize();
-  const [currentScreen, setScreen] = useState<Screen>("practice");
+  const [currentScreen, setScreen] = useState<Screen>("home");
   // Called once here (not inside Lobby/Race) so the same websocket
   // connection survives navigation between those screens - see
   // hooks/useParty.ts for why.
@@ -23,6 +24,8 @@ export default function App() {
   const [settingsReturnScreen, setSettingsReturnScreen] = useState<
     "home" | "practice"
   >("home");
+  const [languageSelectReturnScreen, setLanguageSelectReturnScreen] =
+    useState<"settings" | "lobby">("settings");
   const [practiceSettings, setPracticeSettings] = useState<PracticeSettings>({
     numWords: 30,
     mode: "words",
@@ -46,6 +49,12 @@ export default function App() {
     ) {
       setSettingsReturnScreen(currentScreen);
     }
+    if (
+      screen === "language-select" &&
+      (currentScreen === "settings" || currentScreen === "lobby")
+    ) {
+      setLanguageSelectReturnScreen(currentScreen);
+    }
     // Leaving back to Home always tears down any active party connection -
     // no-op if there isn't one.
     if (screen === "home") {
@@ -67,7 +76,11 @@ export default function App() {
     );
   } else if (currentScreen === "create-party") {
     screen = (
-      <CreateParty onNavigate={navigateTo} apiStatus={apiStatus} party={party} />
+      <CreateParty
+        onNavigate={navigateTo}
+        apiStatus={apiStatus}
+        party={party}
+      />
     );
   } else if (currentScreen === "join-party") {
     screen = (
@@ -90,6 +103,34 @@ export default function App() {
         returnTo={settingsReturnScreen}
         settings={practiceSettings}
         onSettingsChange={setPracticeSettings}
+        apiStatus={apiStatus}
+      />
+    );
+  } else if (currentScreen === "language-select") {
+    const room = party.room;
+    screen = (
+      <LanguageSelect
+        onNavigate={navigateTo}
+        returnTo={languageSelectReturnScreen}
+        currentLanguage={
+          languageSelectReturnScreen === "lobby"
+            ? (room?.language ?? "english")
+            : practiceSettings.language
+        }
+        onSelect={(language) => {
+          if (languageSelectReturnScreen === "lobby") {
+            if (!room) return;
+            party.send({
+              type: "settings",
+              mode: room.mode,
+              time_setting: room.time_setting,
+              word_count: room.word_count,
+              language,
+            });
+          } else {
+            setPracticeSettings((prev) => ({ ...prev, language }));
+          }
+        }}
         apiStatus={apiStatus}
       />
     );

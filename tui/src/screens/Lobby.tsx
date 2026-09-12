@@ -5,7 +5,6 @@ import Footer from "../components/Footer.js";
 import Menu from "../components/Menu.js";
 import {
   generateText,
-  getAvailableLanguages,
   TIME_MODE_WORD_BUFFER,
 } from "../db/textGeneration.js";
 import type { UseParty } from "../hooks/useParty.js";
@@ -20,7 +19,6 @@ interface LobbyProps {
 const MODE_OPTIONS: GameMode[] = ["time", "words", "quote"];
 const WORD_COUNT_OPTIONS = [10, 25, 50, 100, 200];
 const TIME_SETTING_OPTIONS = [15, 30, 60, 120, 300];
-const LANGUAGE_OPTIONS = getAvailableLanguages();
 
 export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
   const room = party.room;
@@ -88,20 +86,6 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
     });
   };
 
-  const cycleLanguage = (direction: -1 | 1) => {
-    if (!room) return;
-    const currentIndex = LANGUAGE_OPTIONS.indexOf(room.language);
-    const nextIndex =
-      (currentIndex === -1 ? 0 : currentIndex + direction + LANGUAGE_OPTIONS.length) %
-      LANGUAGE_OPTIONS.length;
-    sendSettings({
-      mode: room.mode,
-      time_setting: room.time_setting,
-      word_count: room.word_count,
-      language: LANGUAGE_OPTIONS[nextIndex],
-    });
-  };
-
   const handleStart = () => {
     if (!room) return;
     const text =
@@ -163,8 +147,7 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
     {
       label: "Language",
       value: room.language,
-      onLeft: () => cycleLanguage(-1),
-      onRight: () => cycleLanguage(1),
+      onSelect: () => onNavigate("language-select"),
     },
     { label: "Start Race", onSelect: handleStart },
     { label: "Leave", onSelect: handleLeave },

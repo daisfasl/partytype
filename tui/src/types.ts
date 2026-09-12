@@ -6,6 +6,7 @@ export type Screen =
   | "lobby"
   | "race"
   | "settings"
+  | "language-select"
   | "stats";
 
 export type Status = "idle" | "typing" | "completed";

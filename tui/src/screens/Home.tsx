@@ -15,16 +15,11 @@ export default function Home({ onNavigate, apiStatus }: HomeProps) {
     { label: "Practice Mode", onSelect: () => onNavigate("practice") },
     { label: "Create a Party", onSelect: () => onNavigate("create-party") },
     { label: "Join a Party", onSelect: () => onNavigate("join-party") },
-    { label: "Stats", onSelect: () => onNavigate("stats") },
+    { label: "Statistics", onSelect: () => onNavigate("stats") },
     { label: "Settings", onSelect: () => onNavigate("settings") },
   ];
   return (
-    <Box
-      width="100%"
-      alignItems="center"
-      justifyContent="center"
-      height="100%"
-    >
+    <Box width="100%" alignItems="center" justifyContent="center" height="100%">
       <Box flexDirection="column" borderStyle="round" width={60} paddingX={1}>
         <Header subtitle="version 0.1" />
         {/* Welcome Message */}
