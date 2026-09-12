@@ -13,6 +13,7 @@ export type Status = "idle" | "typing" | "completed";
 
 export type PracticeSettings = {
   numWords: number;
+  timeSeconds: number;
   mode: "words" | "time" | "quote";
   language: string;
 };

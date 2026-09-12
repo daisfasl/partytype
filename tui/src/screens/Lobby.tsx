@@ -3,10 +3,7 @@ import { useEffect } from "react";
 import Header from "../components/Header.js";
 import Footer from "../components/Footer.js";
 import Menu from "../components/Menu.js";
-import {
-  generateText,
-  TIME_MODE_WORD_BUFFER,
-} from "../db/textGeneration.js";
+import { generateText, TIME_MODE_WORD_BUFFER } from "../db/textGeneration.js";
 import type { UseParty } from "../hooks/useParty.js";
 import type { ApiStatus, GameMode, Screen } from "../types.js";
 
@@ -49,7 +46,8 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
   const cycleMode = (direction: -1 | 1) => {
     if (!room) return;
     const currentIndex = MODE_OPTIONS.indexOf(room.mode);
-    const nextIndex = (currentIndex + direction + MODE_OPTIONS.length) % MODE_OPTIONS.length;
+    const nextIndex =
+      (currentIndex + direction + MODE_OPTIONS.length) % MODE_OPTIONS.length;
     sendSettings({
       mode: MODE_OPTIONS[nextIndex],
       time_setting: room.time_setting,
@@ -62,7 +60,9 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
     if (!room) return;
     const currentIndex = WORD_COUNT_OPTIONS.indexOf(room.word_count);
     const nextIndex =
-      (currentIndex === -1 ? 0 : currentIndex + direction + WORD_COUNT_OPTIONS.length) %
+      (currentIndex === -1
+        ? 0
+        : currentIndex + direction + WORD_COUNT_OPTIONS.length) %
       WORD_COUNT_OPTIONS.length;
     sendSettings({
       mode: room.mode,
@@ -76,7 +76,9 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
     if (!room) return;
     const currentIndex = TIME_SETTING_OPTIONS.indexOf(room.time_setting);
     const nextIndex =
-      (currentIndex === -1 ? 0 : currentIndex + direction + TIME_SETTING_OPTIONS.length) %
+      (currentIndex === -1
+        ? 0
+        : currentIndex + direction + TIME_SETTING_OPTIONS.length) %
       TIME_SETTING_OPTIONS.length;
     sendSettings({
       mode: room.mode,
@@ -105,7 +107,12 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
 
   if (!room) {
     return (
-      <Box width="100%" alignItems="center" justifyContent="center" height="100%">
+      <Box
+        width="100%"
+        alignItems="center"
+        justifyContent="center"
+        height="100%"
+      >
         <Box flexDirection="column" borderStyle="round" width={60} paddingX={1}>
           <Header subtitle="Lobby" />
           <Box marginTop={1}>
@@ -162,7 +169,10 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
 
         <Box flexDirection="column" marginTop={1}>
           <Text>
-            Room code: <Text bold color="cyan">{room.room}</Text>
+            Room code:{" "}
+            <Text bold color="cyan">
+              {room.room}
+            </Text>
           </Text>
           <Text dimColor>Share this code with friends to join.</Text>
         </Box>
@@ -191,13 +201,16 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
           </Box>
         )}
 
-        <Menu direction="column" options={isHost ? hostOptions : guestOptions} />
+        <Menu
+          direction="column"
+          options={isHost ? hostOptions : guestOptions}
+        />
 
         <Footer
           apiStatus={apiStatus}
           helpText={
             isHost
-              ? "[↑↓] select · [←→] change · [enter] start/select · [esc] leave"
+              ? "[↑↓] select · [←→] change · [enter] confirm · [esc] leave"
               : "[esc] leave"
           }
         />

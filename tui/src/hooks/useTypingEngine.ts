@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Status } from "../types.js";
 import { useInput } from "ink";
 
-export default function useTypingEngine(text: string) {
+export default function useTypingEngine(text: string, durationMs?: number) {
   const [status, setStatus] = useState<Status>("idle");
   const [typed, setTyped] = useState<string>("");
   const [startTime, setStartTime] = useState<number | null>(null);
@@ -13,6 +13,22 @@ export default function useTypingEngine(text: string) {
     setStartTime(null);
     setEndTime(null);
   };
+
+  // Solo "time" mode has no natural end point in the text itself (the prompt
+  // just keeps extending as the player catches up), so it ends on a wall
+  // clock timer from first keystroke instead.
+  useEffect(() => {
+    if (!durationMs || status !== "typing" || startTime === null) return;
+    const remaining = durationMs - (Date.now() - startTime);
+    const timer = setTimeout(
+      () => {
+        setStatus("completed");
+        setEndTime(Date.now());
+      },
+      Math.max(remaining, 0),
+    );
+    return () => clearTimeout(timer);
+  }, [durationMs, status, startTime]);
 
   useInput((input, key) => {
     if (status === "completed") return;
@@ -71,5 +87,5 @@ export default function useTypingEngine(text: string) {
     }
   }
 
-  return { status, typed, restart, wpm, accuracy, correctChars };
+  return { status, typed, restart, wpm, accuracy, correctChars, startTime };
 }

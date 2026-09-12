@@ -14,6 +14,7 @@ interface SettingsProps {
 }
 
 const wordCountOptions = [10, 30, 50, 100];
+const timeSecondsOptions = [15, 30, 60, 120, 300];
 const modeOptions: PracticeSettings["mode"][] = ["words", "time", "quote"];
 
 export default function Settings({
@@ -34,6 +35,17 @@ export default function Settings({
     });
   };
 
+  const updateTimeSeconds = (direction: -1 | 1) => {
+    const currentIndex = timeSecondsOptions.indexOf(settings.timeSeconds);
+    const nextIndex =
+      (currentIndex + direction + timeSecondsOptions.length) %
+      timeSecondsOptions.length;
+    onSettingsChange({
+      ...settings,
+      timeSeconds: timeSecondsOptions[nextIndex],
+    });
+  };
+
   const updateMode = (direction: -1 | 1) => {
     const currentIndex = modeOptions.indexOf(settings.mode);
     const nextIndex =
@@ -51,12 +63,26 @@ export default function Settings({
       onLeft: () => updateMode(-1),
       onRight: () => updateMode(1),
     },
-    {
-      label: "Number of words",
-      value: String(settings.numWords),
-      onLeft: () => updateWordCount(-1),
-      onRight: () => updateWordCount(1),
-    },
+    ...(settings.mode === "words"
+      ? [
+          {
+            label: "Number of words",
+            value: String(settings.numWords),
+            onLeft: () => updateWordCount(-1),
+            onRight: () => updateWordCount(1),
+          },
+        ]
+      : []),
+    ...(settings.mode === "time"
+      ? [
+          {
+            label: "Time (seconds)",
+            value: String(settings.timeSeconds),
+            onLeft: () => updateTimeSeconds(-1),
+            onRight: () => updateTimeSeconds(1),
+          },
+        ]
+      : []),
     {
       label: "Word list",
       value: settings.language,

@@ -28,6 +28,7 @@ export default function App() {
     useState<"settings" | "lobby">("settings");
   const [practiceSettings, setPracticeSettings] = useState<PracticeSettings>({
     numWords: 30,
+    timeSeconds: 30,
     mode: "words",
     language: "english",
   });
