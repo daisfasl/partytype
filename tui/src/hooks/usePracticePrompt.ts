@@ -2,12 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { generateMoreWords, generateText } from "../db/textGeneration.js";
 import type { PracticeSettings } from "../types.js";
 
-// Local-only equivalents of the multiplayer buffer sizing in
-// db/textGeneration.ts - solo "time" mode has no shared-state problem to
-// avoid, so it just starts small and keeps appending as the player catches up.
-const INITIAL_TIME_CHUNK = 50;
-const TIME_EXTEND_CHUNK = 50;
-const TIME_EXTEND_THRESHOLD = 20;
+const INITIAL_TIME_CHUNK = 250;
+const TIME_EXTEND_CHUNK = 250;
+const TIME_EXTEND_THRESHOLD = 250;
 
 export default function usePracticePrompt(settings: PracticeSettings) {
   const [prompt, setPrompt] = useState("");

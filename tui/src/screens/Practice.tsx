@@ -103,7 +103,11 @@ export default function Practice({
             </Gradient>
           </Box>
         )}
-        <PracticeText prompt={prompt} typed={typed} />
+        <PracticeText
+          prompt={prompt}
+          typed={typed}
+          visibleLines={settings.mode === "time" ? 4 : undefined}
+        />
         {shouldShowStats && (
           <PracticeStats status={status} wpm={wpm} accuracy={accuracy} />
         )}
