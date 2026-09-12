@@ -13,7 +13,7 @@ def health_check():
 
 # @app.get("/")
 # async def root():
-#     return {"message": "backend for party type :p"}
+#     return {"message": "backend for terminaltype :p"}
 
 @app.get("/api/words")
 def get_words(dataset_file: str, num_words: int):

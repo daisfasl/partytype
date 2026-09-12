@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-const CONFIG_DIR = join(homedir(), ".config", "partytype");
+const CONFIG_DIR = join(homedir(), ".config", "terminaltype");
 const CONFIG_PATH = join(CONFIG_DIR, "config.json");
 
 type Config = {

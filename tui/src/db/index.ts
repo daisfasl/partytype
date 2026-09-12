@@ -6,8 +6,8 @@ import { join } from "node:path";
 // Lives next to config.json rather than bundled with the binary, so stats
 // survive reinstalls/upgrades. Content tables are re-checked (not
 // re-inserted) on every launch, so this file also works fine deleted.
-const CONFIG_DIR = join(homedir(), ".config", "partytype");
-const DB_PATH = join(CONFIG_DIR, "partytype.db");
+const CONFIG_DIR = join(homedir(), ".config", "terminaltype");
+const DB_PATH = join(CONFIG_DIR, "terminaltype.db");
 
 let db: Database | null = null;
 

@@ -1,4 +1,4 @@
-# partytype
+# terminaltype
 
 A terminal typing game, typeracer-style: solo practice plus multiplayer
 "party" races against friends, played entirely in the terminal.
@@ -36,7 +36,7 @@ pytest
 
 GPL-3.0. See `LICENSE`.
 
-partytype is licensed GPL-3.0 specifically so it can incorporate word list
+terminaltype is licensed GPL-3.0 specifically so it can incorporate word list
 and quote content from [MonkeyType](https://github.com/monkeytypegame/monkeytype),
 which is itself GPL-3.0.
 
