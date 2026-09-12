@@ -2,6 +2,8 @@ import { Box, Text, useInput } from "ink";
 import Header from "../components/Header.js";
 import Footer from "../components/Footer.js";
 import Menu from "../components/Menu.js";
+import ActivityGraph from "../components/ActivityGraph.js";
+import useTerminalSize from "../hooks/useTerminalSize.js";
 import { getBest } from "../db/stats.js";
 import type { ApiStatus, Screen } from "../types.js";
 
@@ -29,11 +31,17 @@ export default function Stats({ onNavigate, apiStatus }: StatsProps) {
   });
 
   const quoteBest = getBest("quote", null);
+  const { columns } = useTerminalSize();
+  const boxWidth = Math.min(Math.max((columns ?? 80) - 4, 60), 120);
 
   return (
     <Box width="100%" alignItems="center" justifyContent="center" height="100%">
-      <Box flexDirection="column" borderStyle="round" width={60} paddingX={1}>
+      <Box flexDirection="column" borderStyle="round" width={boxWidth} paddingX={1}>
         <Header subtitle="Personal Bests" />
+
+        <Box marginTop={1}>
+          <ActivityGraph maxWidth={boxWidth - 4} />
+        </Box>
 
         <Box flexDirection="column" marginTop={1}>
           <Text dimColor>Words:</Text>
