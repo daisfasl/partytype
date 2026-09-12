@@ -79,10 +79,16 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
 
   // Finish only makes sense for words/quote - "time" mode's buffer is sized
   // so players shouldn't reach the end; it only ends via server timeout.
+  // Requires an *exact* match, not just matching length - useTypingEngine
+  // lets you type past errors (they show red) but blocks further input once
+  // you hit the target length, so reaching max length with mistakes still
+  // remaining just leaves you stuck there until you backspace and fix them.
+  // Without this, mashing garbage the same length as the text would trigger
+  // an instant "finish" with near-zero real accuracy.
   useEffect(() => {
     if (!raceActive || raceEnded || !room || finishSentRef.current) return;
     if (room.mode === "time") return;
-    if (typed.length > 0 && typed.length === room.text.length) {
+    if (typed.length > 0 && typed === room.text) {
       finishSentRef.current = true;
       party.send({ type: "finish" });
     }

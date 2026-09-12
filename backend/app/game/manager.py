@@ -246,33 +246,27 @@ async def finalize_race(room: str) -> None:
     if room_state["status"] != "active":
         return
     players = room_state["players"]
-    finish_order = room_state["finish_order"]
+
+    # Rank by final wpm, not finish order - the server-arrival order of
+    # FinishPayload messages is subject to network latency jitter between
+    # players and isn't a reliable proxy for who actually typed faster. A
+    # finisher outranks a non-finisher on an exact wpm tie (completing the
+    # whole text is strictly a stronger result than partial progress at the
+    # same rate); accuracy is the final tiebreak.
+    ranked_ids = sorted(
+        players.keys(),
+        key=lambda pid: (players[pid]["wpm"], players[pid]["finished"], players[pid]["accuracy"]),
+        reverse=True,
+    )
 
     leaderboard: list[LeaderboardEntry] = []
-    rank = 1
-    for player_id in finish_order:
-        if player_id not in players:
-            continue
+    for rank, player_id in enumerate(ranked_ids, start=1):
         p = players[player_id]
         leaderboard.append(LeaderboardEntry(player_id=player_id,
                                             wpm=p["wpm"],
                                             accuracy=p["accuracy"],
                                             rank=rank,
-                                            finished=True))
-        rank += 1
-
-    # players who never finished, best-effort ranked by wpm at the cutoff
-    unfinished = sorted((pid for pid in players if pid not in finish_order),
-                        key=lambda pid: players[pid]["wpm"],
-                        reverse=True)
-    for player_id in unfinished:
-        p = players[player_id]
-        leaderboard.append(LeaderboardEntry(player_id=player_id,
-                                            wpm=p["wpm"],
-                                            accuracy=p["accuracy"],
-                                            rank=rank,
-                                            finished=False))
-        rank += 1
+                                            finished=p["finished"]))
 
     room_state["status"] = "waiting"
     await manager.broadcast(room, GameEndPayload(type="end", leaderboard=leaderboard))
