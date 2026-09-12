@@ -5,6 +5,7 @@ import Footer from "../components/Footer.js";
 import Menu from "../components/Menu.js";
 import PracticeText from "../components/practice/PracticeText.js";
 import { recordResult } from "../db/stats.js";
+import { getModeSettingValue } from "../gameMode.js";
 import useTypingEngine from "../hooks/useTypingEngine.js";
 import type { UseParty } from "../hooks/useParty.js";
 import type { ApiStatus, Screen } from "../types.js";
@@ -98,12 +99,11 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
     if (!raceEnded || !room || !party.playerId) return;
     const me = room.players[party.playerId];
     if (!me) return;
-    const settingValue =
-      room.mode === "words"
-        ? room.word_count
-        : room.mode === "time"
-          ? room.time_setting
-          : null;
+    const settingValue = getModeSettingValue(
+      room.mode,
+      room.word_count,
+      room.time_setting,
+    );
     recordResult(room.mode, settingValue, me.wpm, me.accuracy);
     // Only once per race end.
     // eslint-disable-next-line react-hooks/exhaustive-deps

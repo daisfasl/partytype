@@ -5,8 +5,10 @@ import Footer from "../components/Footer.js";
 import PracticeControls from "../components/practice/PracticeControls.js";
 import PracticeStats from "../components/practice/PracticeStats.js";
 import PracticeText from "../components/practice/PracticeText.js";
-import { recordResult } from "../db/stats.js";
+import { getModeSettingValue } from "../gameMode.js";
+import useCountdown from "../hooks/useCountdown.js";
 import usePracticePrompt from "../hooks/usePracticePrompt.js";
+import useRecordResult from "../hooks/useRecordResult.js";
 import useTypingEngine from "../hooks/useTypingEngine.js";
 import type { PracticeSettings, Screen } from "../types.js";
 import type { ApiStatus } from "../types.js";
@@ -39,19 +41,12 @@ export default function Practice({
     durationMs,
   );
 
-  const [, forceTick] = useState(0);
-  useEffect(() => {
-    if (settings.mode !== "time" || status !== "typing") return;
-    const interval = setInterval(() => forceTick((n) => n + 1), 1000);
-    return () => clearInterval(interval);
-  }, [settings.mode, status]);
-
-  let remainingSeconds = settings.timeSeconds;
-  if (settings.mode === "time" && startTime !== null && durationMs) {
-    const elapsedMs =
-      status === "completed" ? durationMs : Date.now() - startTime;
-    remainingSeconds = Math.max(0, Math.ceil((durationMs - elapsedMs) / 1000));
-  }
+  const remainingSecondsOrNull = useCountdown({
+    durationMs,
+    startTime,
+    isDone: status === "completed",
+  });
+  const remainingSeconds = remainingSecondsOrNull ?? settings.timeSeconds;
 
   const restartPractice = () => {
     setShowStats(false);
@@ -63,23 +58,17 @@ export default function Practice({
     extendIfNeeded(typed.length);
   }, [typed, extendIfNeeded]);
 
-  useEffect(() => {
-    if (status !== "completed") return;
-    if (settings.mode === "words") {
-      recordResult("words", settings.numWords, wpm, accuracy);
-    } else if (settings.mode === "time") {
-      recordResult("time", settings.timeSeconds, wpm, accuracy);
-    } else if (settings.mode === "quote") {
-      recordResult("quote", null, wpm, accuracy);
-    }
-  }, [
-    status,
-    settings.mode,
-    settings.numWords,
-    settings.timeSeconds,
+  useRecordResult({
+    shouldRecord: status === "completed",
+    mode: settings.mode,
+    settingValue: getModeSettingValue(
+      settings.mode,
+      settings.numWords,
+      settings.timeSeconds,
+    ),
     wpm,
     accuracy,
-  ]);
+  });
 
   useInput((_input, key) => {
     if (key.escape) {
