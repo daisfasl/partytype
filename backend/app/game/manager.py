@@ -93,9 +93,14 @@ class ConnectionManager:
             self.rooms[room]["players"][player_id]["correct_chars"] = payload.correct_chars
 
             # calc. wpm/accuracy
-            # wpm from *correct* chars only, over elapsed minutes
+            # wpm from *correct* chars only, over elapsed minutes. Below
+            # MIN_ELAPSED_MINUTES_FOR_WPM the number blows up toward infinity
+            # for a fraction of a second right as the race starts (matches
+            # the same floor in the TUI's useTypingEngine.ts) - hold at 0
+            # instead of broadcasting a spike to everyone else in the room.
+            MIN_ELAPSED_MINUTES_FOR_WPM = 1 / 60  # 1 second
             elapsed_minutes = (time.perf_counter() - start_time) / 60
-            wpm = round((payload.correct_chars / 5) / elapsed_minutes) if elapsed_minutes > 0 else 0
+            wpm = round((payload.correct_chars / 5) / elapsed_minutes) if elapsed_minutes >= MIN_ELAPSED_MINUTES_FOR_WPM else 0
             accuracy = round((payload.correct_chars / payload.cursor) * 100) if payload.cursor > 0 else 0
 
             self.rooms[room]["players"][player_id]["wpm"] = wpm
