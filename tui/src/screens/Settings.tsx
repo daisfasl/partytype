@@ -84,7 +84,7 @@ export default function Settings({
         ]
       : []),
     {
-      label: "Word list",
+      label: "Language",
       value: settings.language,
       onSelect: () => onNavigate("language-select"),
     },
