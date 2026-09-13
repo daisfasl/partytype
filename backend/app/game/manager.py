@@ -28,6 +28,8 @@ class ConnectionManager:
             "time_setting" : 60, # selected time setting (seconds), only meaningful in "time" mode
             "word_count" : 25, # selected word count, only meaningful in "words" mode
             "language" : "english", # selected word/quote list language
+            "quote_length" : "medium", # selected quote length tier, only meaningful in "quote" mode
+            "quote_source" : None, # title/source of the current quote, only meaningful in "quote" mode
             "players" : {},
             "host" : player_id,
             "start_time": None,
@@ -147,6 +149,7 @@ class ConnectionManager:
             if player_id == self.rooms[room]["host"] and self.rooms[room]["status"] == "waiting":
                 self.rooms[room]["status"] = "countdown"
                 self.rooms[room]["text"] = payload.text
+                self.rooms[room]["quote_source"] = payload.quote_source
                 # fresh per-race state for this (re)start
                 self.rooms[room]["finish_order"] = []
                 for player in self.rooms[room]["players"].values():
@@ -198,7 +201,9 @@ class ConnectionManager:
                                                time_setting = self.rooms[room]["time_setting"],
                                                word_count = self.rooms[room]["word_count"],
                                                language = self.rooms[room]["language"],
+                                               quote_length = self.rooms[room]["quote_length"],
                                                text = self.rooms[room]["text"],
+                                               quote_source = self.rooms[room]["quote_source"],
                                                players = self.rooms[room]["players"],
                                                host = self.rooms[room]["host"]))
 
@@ -211,6 +216,7 @@ class ConnectionManager:
                 self.rooms[room]["time_setting"] = payload.time_setting
                 self.rooms[room]["word_count"] = payload.word_count
                 self.rooms[room]["language"] = payload.language
+                self.rooms[room]["quote_length"] = payload.quote_length
                 await self.handle_room_update(room)
     
     def set_start_time(self, room: str, start_time):

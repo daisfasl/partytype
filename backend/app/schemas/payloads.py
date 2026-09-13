@@ -25,6 +25,7 @@ class ProgressPayload(BaseModel):
 class StartPayload(BaseModel):
     type: Literal["start"]
     text: str
+    quote_source: str | None = None # only meaningful in "quote" mode
 
 class FinishPayload(BaseModel):
     type: Literal["finish"]
@@ -35,6 +36,7 @@ class UpdateSettingsPayload(BaseModel):
     time_setting: int = Field(ge = 15, le = 300)
     word_count: int = Field(ge = 10, le = 200)
     language: str
+    quote_length: Literal["short", "medium", "long", "extreme"]
 
 # ------------------------- 
 # ------------------------- Server -> Players
@@ -49,7 +51,9 @@ class RoomPayload(BaseModel):
     time_setting: int
     word_count: int
     language: str
+    quote_length: Literal["short", "medium", "long", "extreme"]
     text: str
+    quote_source: str | None
     players: dict[str, Player]
     host: str
 
