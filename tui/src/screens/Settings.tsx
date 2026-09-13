@@ -1,7 +1,7 @@
 import { Box, useInput } from "ink";
 import Header from "../components/Header.js";
 import Menu from "../components/Menu.js";
-import type { PracticeSettings, Screen } from "../types.js";
+import type { PracticeSettings, QuoteLength, Screen } from "../types.js";
 import Footer from "../components/Footer.js";
 import type { ApiStatus } from "../types.js";
 
@@ -16,6 +16,7 @@ interface SettingsProps {
 const wordCountOptions = [10, 30, 50, 100];
 const timeSecondsOptions = [15, 30, 60, 120, 300];
 const modeOptions: PracticeSettings["mode"][] = ["words", "time", "quote"];
+const quoteLengthOptions: QuoteLength[] = ["short", "medium", "long", "extreme"];
 
 export default function Settings({
   onNavigate,
@@ -56,6 +57,17 @@ export default function Settings({
     });
   };
 
+  const updateQuoteLength = (direction: -1 | 1) => {
+    const currentIndex = quoteLengthOptions.indexOf(settings.quoteLength);
+    const nextIndex =
+      (currentIndex + direction + quoteLengthOptions.length) %
+      quoteLengthOptions.length;
+    onSettingsChange({
+      ...settings,
+      quoteLength: quoteLengthOptions[nextIndex],
+    });
+  };
+
   const settingOptions = [
     {
       label: "Mode",
@@ -80,6 +92,16 @@ export default function Settings({
             value: String(settings.timeSeconds),
             onLeft: () => updateTimeSeconds(-1),
             onRight: () => updateTimeSeconds(1),
+          },
+        ]
+      : []),
+    ...(settings.mode === "quote"
+      ? [
+          {
+            label: "Quote length",
+            value: settings.quoteLength,
+            onLeft: () => updateQuoteLength(-1),
+            onRight: () => updateQuoteLength(1),
           },
         ]
       : []),

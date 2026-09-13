@@ -31,6 +31,7 @@ export default function App() {
     timeSeconds: 30,
     mode: "words",
     language: "english",
+    quoteLength: "medium",
   });
   const healthRequest = useCallback(
     () =>
@@ -127,6 +128,7 @@ export default function App() {
               time_setting: room.time_setting,
               word_count: room.word_count,
               language,
+              quote_length: room.quote_length,
             });
           } else {
             setPracticeSettings((prev) => ({ ...prev, language }));
