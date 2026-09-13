@@ -5,7 +5,7 @@ import Footer from "../components/Footer.js";
 import Menu from "../components/Menu.js";
 import PracticeText from "../components/practice/PracticeText.js";
 import { recordResult } from "../db/stats.js";
-import { formatTime, getModeSettingValue } from "../gameMode.js";
+import { GRACE_PERIOD_SECONDS, formatTime, getModeSettingValue } from "../gameMode.js";
 import useCountdown from "../hooks/useCountdown.js";
 import useTypingEngine from "../hooks/useTypingEngine.js";
 import type { UseParty } from "../hooks/useParty.js";
@@ -42,6 +42,7 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
   const [raceStartTime, setRaceStartTime] = useState<number | null>(null);
   const [raceEnded, setRaceEnded] = useState(false);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[] | null>(null);
+  const [graceStartTime, setGraceStartTime] = useState<number | null>(null);
   const finishSentRef = useRef(false);
 
   const text = raceActive ? (room?.text ?? "") : "";
@@ -59,6 +60,19 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
   });
   const remainingSeconds =
     remainingSecondsOrNull ?? (room ? room.time_setting : 0);
+
+  // Once any player finishes, the server gives stragglers a grace period
+  // before ending the race for everyone (see backend GRACE_PERIOD_SECONDS).
+  // This is a client-side approximation of when that grace period began -
+  // not perfectly server-synced, fine for a UX countdown display.
+  const anyFinished = room
+    ? Object.values(room.players).some((p) => p.finished)
+    : false;
+  const graceRemainingSeconds = useCountdown({
+    durationMs: GRACE_PERIOD_SECONDS * 1000,
+    startTime: graceStartTime,
+    isDone: raceEnded,
+  });
 
   const goActive = () => {
     setRaceActive(true);
@@ -79,6 +93,7 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
       setLeaderboard(null);
       setRaceActive(false);
       setRaceStartTime(null);
+      setGraceStartTime(null);
       finishSentRef.current = false;
 
       setCountdownValue(party.lastEvent.value);
@@ -98,6 +113,13 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
   useEffect(() => {
     if (room?.status === "active") goActive();
   }, [room?.status]);
+
+  // Mark when the grace period starts, the first time any player finishes.
+  useEffect(() => {
+    if (anyFinished && graceStartTime === null) {
+      setGraceStartTime(Date.now());
+    }
+  }, [anyFinished, graceStartTime]);
 
   // Send progress while racing.
   useEffect(() => {
@@ -256,6 +278,11 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
           <Text>wpm: {wpm}</Text>
           <Text> accuracy: {accuracy}%</Text>
         </Box>
+        {graceStartTime !== null && !raceEnded && (
+          <Box alignSelf="center" marginTop={1}>
+            <Text dimColor>Race ends in {graceRemainingSeconds ?? GRACE_PERIOD_SECONDS}s</Text>
+          </Box>
+        )}
         {iHaveFinished && (
           <Box alignSelf="center" marginTop={1}>
             <Text dimColor>Waiting for others to finish...</Text>
