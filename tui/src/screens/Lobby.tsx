@@ -164,7 +164,7 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
 
   return (
     <Box width="100%" alignItems="center" justifyContent="center" height="100%">
-      <Box flexDirection="column" borderStyle="round" width={60} paddingX={1}>
+      <Box flexDirection="column" borderStyle="round" width={78} paddingX={1}>
         <Header subtitle="Lobby" />
 
         <Box flexDirection="column" marginTop={1}>

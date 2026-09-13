@@ -46,10 +46,12 @@ export default function useTypingEngine(text: string, durationMs?: number) {
   }, [status]);
 
   useInput((input, key) => {
-    if (status === "completed") return;
+    if (status === "completed" || status === "paused") return;
 
     if (key.tab || key.escape) {
-      setStatus("idle");
+      if (status === "typing") {
+        setStatus("paused");
+      }
       return;
     }
 

@@ -71,7 +71,9 @@ export interface ActivityDay {
 // buildActivityGrid in activityGrid.ts).
 export function getActivity(days: number): ActivityDay[] {
   const db = getDb();
-  const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+  const cutoff = new Date(
+    Date.now() - days * 24 * 60 * 60 * 1000,
+  ).toISOString();
   return db
     .query(
       `SELECT date(completed_at) as date, COUNT(*) as count

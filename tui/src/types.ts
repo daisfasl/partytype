@@ -9,7 +9,7 @@ export type Screen =
   | "language-select"
   | "stats";
 
-export type Status = "idle" | "typing" | "completed";
+export type Status = "idle" | "typing" | "paused" | "completed";
 
 export type PracticeSettings = {
   numWords: number;

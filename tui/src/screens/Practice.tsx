@@ -67,7 +67,7 @@ export default function Practice({
     if (key.escape) {
       onNavigate("home");
     }
-    if (key.tab) {
+    if (key.tab && status === "typing") {
       setShowStats(true);
     }
   });
@@ -103,7 +103,7 @@ export default function Practice({
       </Box>
       <Footer
         apiStatus={apiStatus}
-        helpText="[←→] select · [enter] open · [esc] quit"
+        helpText="[tab] pause · [←→] select · [enter] open · [esc] quit"
       />
     </Box>
   );

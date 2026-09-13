@@ -32,7 +32,8 @@ interface ActivityGraphProps {
 export default function ActivityGraph({ maxWidth }: ActivityGraphProps) {
   const { columns } = useTerminalSize();
 
-  const availableForGrid = (maxWidth ?? columns ?? 80) - LABEL_WIDTH - 2;
+  const containerWidth = maxWidth ?? columns ?? 80;
+  const availableForGrid = containerWidth - LABEL_WIDTH - 2;
   const maxWeeksThatFit = Math.floor(availableForGrid / CELL_WIDTH);
   const weeks = Math.max(MIN_WEEKS, Math.min(DEFAULT_WEEKS, maxWeeksThatFit));
 
@@ -41,7 +42,7 @@ export default function ActivityGraph({ maxWidth }: ActivityGraphProps) {
   const grid = buildActivityGrid(activity, weeks);
 
   return (
-    <Box flexDirection="column">
+    <Box flexDirection="column" width={containerWidth}>
       <Box justifyContent="space-between" width="100%">
         <Text>
           <Text bold>{total}</Text> tests completed
@@ -49,7 +50,7 @@ export default function ActivityGraph({ maxWidth }: ActivityGraphProps) {
         <Text dimColor>{weeks === DEFAULT_WEEKS ? "last 12 months" : `last ${weeks} weeks`}</Text>
       </Box>
 
-      <Box marginTop={1}>
+      <Box marginTop={1} width="100%" justifyContent="center">
         <Box flexDirection="column" width={LABEL_WIDTH}>
           {DAY_LABELS.map((label, i) => (
             <Text key={i} dimColor>
