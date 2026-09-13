@@ -20,20 +20,41 @@ export const TIME_MODE_WORD_BUFFER = 1200;
 
 type Mode = "words" | "time" | "quote";
 
+// MonkeyType's own 4-tier quote-length convention. Each language's quote
+// file carries its own `groups` array of [min, max] character-length
+// ranges in this exact tier order - read from the file rather than
+// hardcoded here, in case a language's ranges ever differ.
+export type QuoteLength = "short" | "medium" | "long" | "extreme";
+
+const QUOTE_LENGTH_GROUP_INDEX: Record<QuoteLength, number> = {
+  short: 0,
+  medium: 1,
+  long: 2,
+  extreme: 3,
+};
+
 interface LanguageFile {
   name: string;
   words: string[];
 }
 
+interface QuoteEntry {
+  text: string;
+  source: string;
+  length: number;
+  id: number;
+}
+
 interface QuoteFile {
   language: string;
-  quotes: { text: string }[];
+  groups: number[][];
+  quotes: QuoteEntry[];
 }
 
 const wordListCache = new Map<string, string[]>();
 // null entry = confirmed no quote file for this language (cached so repeated
 // lookups don't keep hitting the filesystem).
-const quoteListCache = new Map<string, string[] | null>();
+const quoteFileCache = new Map<string, QuoteFile | null>();
 
 function loadWordList(language: string): string[] {
   const cached = wordListCache.get(language);
@@ -48,30 +69,52 @@ function loadWordList(language: string): string[] {
   return data.words;
 }
 
-function loadQuoteList(language: string): string[] | null {
-  const cached = quoteListCache.get(language);
+function loadQuoteFile(language: string): QuoteFile | null {
+  const cached = quoteFileCache.get(language);
   if (cached !== undefined) return cached;
 
   const path = join(QUOTES_DIR, `${language}.json`);
   if (!existsSync(path)) {
-    quoteListCache.set(language, null);
+    quoteFileCache.set(language, null);
     return null;
   }
   const data = JSON.parse(readFileSync(path, "utf-8")) as QuoteFile;
-  const texts = data.quotes.map((quote) => quote.text);
-  quoteListCache.set(language, texts);
-  return texts;
+  quoteFileCache.set(language, data);
+  return data;
+}
+
+// Quotes in a language file whose `length` falls in the requested tier's
+// [min, max] range (from that file's own `groups`, not hardcoded).
+function quotesInLengthBucket(file: QuoteFile, quoteLength: QuoteLength): QuoteEntry[] {
+  const range = file.groups[QUOTE_LENGTH_GROUP_INDEX[quoteLength]];
+  if (!range) return file.quotes;
+  const [min, max] = range;
+  return file.quotes.filter((quote) => quote.length >= min && quote.length <= max);
 }
 
 // Not every language MonkeyType ships words for also has a quote file -
-// fall back to English quotes rather than throwing.
-function randomQuote(language: string): string {
-  let quotes = loadQuoteList(language);
-  if (!quotes || quotes.length === 0) {
-    quotes = loadQuoteList(DEFAULT_LANGUAGE);
+// fall back to English quotes rather than throwing. Same degrade-gracefully
+// spirit applies if a requested length bucket comes up empty for a (usually
+// small) language file - fall back to that language's full quote list
+// rather than returning nothing.
+export function getRandomQuoteWithSource(
+  language: string,
+  quoteLength?: QuoteLength,
+): { text: string; source: string } {
+  let file = loadQuoteFile(language);
+  if (!file || file.quotes.length === 0) {
+    file = loadQuoteFile(DEFAULT_LANGUAGE);
   }
-  if (!quotes || quotes.length === 0) return "";
-  return quotes[Math.floor(Math.random() * quotes.length)]!;
+  if (!file || file.quotes.length === 0) return { text: "", source: "" };
+
+  let pool = file.quotes;
+  if (quoteLength) {
+    const bucketed = quotesInLengthBucket(file, quoteLength);
+    if (bucketed.length > 0) pool = bucketed;
+  }
+
+  const chosen = pool[Math.floor(Math.random() * pool.length)]!;
+  return { text: chosen.text, source: chosen.source };
 }
 
 function randomWords(count: number, language: string): string[] {
@@ -99,8 +142,11 @@ export function generateText(
 ): string {
   // "words" and "time" both resolve to N random words joined - the caller
   // decides what N means (a word-count setting, an initial local chunk for
-  // solo endless mode, or TIME_MODE_WORD_BUFFER for multiplayer).
-  if (mode === "quote") return randomQuote(language);
+  // solo endless mode, or TIME_MODE_WORD_BUFFER for multiplayer). Quote-mode
+  // callers that also need the source should use getRandomQuoteWithSource
+  // instead - this stays string-only so "words"/"time" callers keep a
+  // stable return type.
+  if (mode === "quote") return getRandomQuoteWithSource(language).text;
   return randomWords(count, language).join(" ");
 }
 
