@@ -88,7 +88,9 @@ export default function Practice({
         )}
         {settings.mode === "quote" && quoteSource && (
           <Box width={60} alignSelf="center">
-            <Text dimColor>— {quoteSource}</Text>
+            <Gradient name="pastel">
+              <Text dimColor>Source: {quoteSource}</Text>
+            </Gradient>
           </Box>
         )}
         <PracticeText
@@ -98,6 +100,7 @@ export default function Practice({
         />
         {shouldShowStats && (
           <PracticeStats status={status} wpm={wpm} accuracy={accuracy} />
+         
         )}
         {status !== "typing" && (
           <PracticeControls

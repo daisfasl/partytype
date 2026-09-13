@@ -8,7 +8,7 @@ interface FooterProps {
 
 export default function Footer({
   apiStatus = "offline",
-  helpText = "[↑↓] select · [enter] open · [q] quit",
+  helpText = "[↑↓] select · [enter] open · [ctrl+c] quit",
 }: FooterProps) {
   const isOnline = apiStatus === "online";
   const statusText = isOnline ? "● online" : "● offline";
