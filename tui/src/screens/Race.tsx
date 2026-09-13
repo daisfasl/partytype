@@ -69,6 +69,18 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
   useEffect(() => {
     if (!party.lastEvent) return;
     if (party.lastEvent.kind === "countdown") {
+      // A fresh countdown means a new race is starting. Reset state left
+      // over from a previous race - a player who never clicked "Back to
+      // Lobby" after the last race ended would otherwise stay stuck on the
+      // old results screen forever, since raceEnded/leaderboard never got
+      // cleared and that render branch takes priority over the new
+      // countdown/race actually starting underneath it.
+      setRaceEnded(false);
+      setLeaderboard(null);
+      setRaceActive(false);
+      setRaceStartTime(null);
+      finishSentRef.current = false;
+
       setCountdownValue(party.lastEvent.value);
       if (party.lastEvent.value === 1) {
         const timer = setTimeout(goActive, COUNTDOWN_TO_ACTIVE_DELAY_MS);
