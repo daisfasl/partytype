@@ -3,9 +3,9 @@ import { useEffect } from "react";
 import Header from "../components/Header.js";
 import Footer from "../components/Footer.js";
 import Menu from "../components/Menu.js";
-import { generateText, TIME_MODE_WORD_BUFFER } from "../db/textGeneration.js";
+import { TIME_MODE_WORD_BUFFER, getRandomQuoteWithSource, generateText } from "../db/textGeneration.js";
 import type { UseParty } from "../hooks/useParty.js";
-import type { ApiStatus, GameMode, Screen } from "../types.js";
+import type { ApiStatus, GameMode, QuoteLength, Screen } from "../types.js";
 
 interface LobbyProps {
   onNavigate: (screen: Screen) => void;
@@ -16,6 +16,7 @@ interface LobbyProps {
 const MODE_OPTIONS: GameMode[] = ["time", "words", "quote"];
 const WORD_COUNT_OPTIONS = [10, 25, 50, 100, 200];
 const TIME_SETTING_OPTIONS = [15, 30, 60, 120, 300];
+const QUOTE_LENGTH_OPTIONS: QuoteLength[] = ["short", "medium", "long", "extreme"];
 
 export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
   const room = party.room;
@@ -39,6 +40,7 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
     time_setting: number;
     word_count: number;
     language: string;
+    quote_length: QuoteLength;
   }) => {
     party.send({ type: "settings", ...next });
   };
@@ -53,6 +55,7 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
       time_setting: room.time_setting,
       word_count: room.word_count,
       language: room.language,
+      quote_length: room.quote_length,
     });
   };
 
@@ -69,6 +72,7 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
       time_setting: room.time_setting,
       word_count: WORD_COUNT_OPTIONS[nextIndex],
       language: room.language,
+      quote_length: room.quote_length,
     });
   };
 
@@ -85,17 +89,41 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
       time_setting: TIME_SETTING_OPTIONS[nextIndex],
       word_count: room.word_count,
       language: room.language,
+      quote_length: room.quote_length,
+    });
+  };
+
+  const cycleQuoteLength = (direction: -1 | 1) => {
+    if (!room) return;
+    const currentIndex = QUOTE_LENGTH_OPTIONS.indexOf(room.quote_length);
+    const nextIndex =
+      (currentIndex === -1
+        ? 0
+        : currentIndex + direction + QUOTE_LENGTH_OPTIONS.length) %
+      QUOTE_LENGTH_OPTIONS.length;
+    sendSettings({
+      mode: room.mode,
+      time_setting: room.time_setting,
+      word_count: room.word_count,
+      language: room.language,
+      quote_length: QUOTE_LENGTH_OPTIONS[nextIndex],
     });
   };
 
   const handleStart = () => {
     if (!room) return;
+    if (room.mode === "quote") {
+      const { text, source } = getRandomQuoteWithSource(
+        room.language,
+        room.quote_length,
+      );
+      party.send({ type: "start", text, quote_source: source });
+      return;
+    }
     const text =
-      room.mode === "quote"
-        ? generateText("quote", 0, room.language)
-        : room.mode === "words"
-          ? generateText("words", room.word_count, room.language)
-          : generateText("time", TIME_MODE_WORD_BUFFER, room.language);
+      room.mode === "words"
+        ? generateText("words", room.word_count, room.language)
+        : generateText("time", TIME_MODE_WORD_BUFFER, room.language);
     party.send({ type: "start", text });
   };
 
@@ -148,6 +176,16 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
             value: String(room.time_setting),
             onLeft: () => cycleTimeSetting(-1),
             onRight: () => cycleTimeSetting(1),
+          },
+        ]
+      : []),
+    ...(room.mode === "quote"
+      ? [
+          {
+            label: "Quote length",
+            value: room.quote_length,
+            onLeft: () => cycleQuoteLength(-1),
+            onRight: () => cycleQuoteLength(1),
           },
         ]
       : []),

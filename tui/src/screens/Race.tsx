@@ -269,6 +269,11 @@ export default function Race({ onNavigate, apiStatus, party }: RaceProps) {
             </Gradient>
           </Box>
         )}
+        {room.mode === "quote" && room.quote_source && (
+          <Box width={60} alignSelf="center">
+            <Text dimColor>— {room.quote_source}</Text>
+          </Box>
+        )}
         <PracticeText
           prompt={room.text}
           typed={typed}
