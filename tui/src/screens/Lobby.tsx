@@ -233,6 +233,7 @@ export default function Lobby({ onNavigate, apiStatus, party }: LobbyProps) {
               Mode: {room.mode}
               {room.mode === "words" && ` · ${room.word_count} words`}
               {room.mode === "time" && ` · ${room.time_setting}s`}
+              {room.mode === "quote" && ` · ${room.quote_length}`}
               {` · ${room.language}`}
             </Text>
             <Text dimColor>Waiting for host to start...</Text>
