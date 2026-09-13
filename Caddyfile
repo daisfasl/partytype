@@ -1,0 +1,8 @@
+# {$DOMAIN} defaults to "localhost" for local dev (Caddy serves that with
+# its own internal CA / self-signed cert automatically - no Let's Encrypt
+# involved, no real domain needed). On the real EC2 deployment, set DOMAIN
+# to the actual domain/subdomain pointed at the instance's Elastic IP (see
+# ROADMAP.md Phase F) and Caddy will get/renew a real Let's Encrypt cert.
+{$DOMAIN} {
+	reverse_proxy backend:8000
+}

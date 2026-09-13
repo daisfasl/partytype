@@ -1,0 +1,34 @@
+services:
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    # Exposed directly too (not just proxied through Caddy) so local dev can
+    # keep hitting ws://localhost:8000 same as the non-Docker workflow. On
+    # the real EC2 deployment this is harmless even though it's "exposed" —
+    # the security group only allows 22/80/443 in from the internet, so port
+    # 8000 is only reachable from the box itself/other containers regardless.
+    ports:
+      - "8000:8000"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN=${DOMAIN:-localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      # Persist Caddy's certificate storage - without this, every rebuild
+      # makes Caddy request a brand new Let's Encrypt cert instead of
+      # reusing the one it already has, and Let's Encrypt rate-limits to 5
+      # certs per domain per week.
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+
+volumes:
+  caddy_data:
+  caddy_config:
