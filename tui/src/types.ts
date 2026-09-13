@@ -16,6 +16,7 @@ export type PracticeSettings = {
   timeSeconds: number;
   mode: "words" | "time" | "quote";
   language: string;
+  quoteLength: QuoteLength;
 };
 
 export type ApiStatus = "loading" | "online" | "offline";
@@ -29,6 +30,9 @@ export type ApiStatus = "loading" | "online" | "offline";
 
 export type GameMode = "time" | "words" | "quote";
 export type RoomStatus = "waiting" | "countdown" | "active" | "completed";
+// MonkeyType's own 4-tier quote-length convention - see db/textGeneration.ts
+// for the bucketing logic against each language's own `groups` ranges.
+export type QuoteLength = "short" | "medium" | "long" | "extreme";
 
 export interface Player {
   cursor: number;
@@ -50,6 +54,7 @@ export interface ProgressPayload {
 export interface StartPayload {
   type: "start";
   text: string;
+  quote_source?: string; // only meaningful in "quote" mode
 }
 
 export interface FinishPayload {
@@ -62,6 +67,7 @@ export interface UpdateSettingsPayload {
   time_setting: number; // 15-300 seconds, only meaningful in "time" mode
   word_count: number; // 10-200, only meaningful in "words" mode
   language: string;
+  quote_length: QuoteLength; // only meaningful in "quote" mode
 }
 
 // Server -> Players
@@ -73,7 +79,9 @@ export interface RoomPayload {
   time_setting: number;
   word_count: number;
   language: string;
+  quote_length: QuoteLength;
   text: string;
+  quote_source: string | null;
   players: Record<string, Player>;
   host: string;
 }
