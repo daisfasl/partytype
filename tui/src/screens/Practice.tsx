@@ -26,7 +26,8 @@ export default function Practice({
   apiStatus,
 }: PracticeProps) {
   const [showStats, setShowStats] = useState(false);
-  const { prompt, fetchPrompt, extendIfNeeded } = usePracticePrompt(settings);
+  const { prompt, quoteSource, fetchPrompt, extendIfNeeded } =
+    usePracticePrompt(settings);
   const durationMs =
     settings.mode === "time" ? settings.timeSeconds * 1000 : undefined;
   const { status, typed, restart, wpm, accuracy, startTime } = useTypingEngine(
@@ -83,6 +84,11 @@ export default function Practice({
             <Gradient name="pastel">
               <Text>Time: {formatTime(remainingSeconds)}</Text>
             </Gradient>
+          </Box>
+        )}
+        {settings.mode === "quote" && quoteSource && (
+          <Box width={60} alignSelf="center">
+            <Text dimColor>— {quoteSource}</Text>
           </Box>
         )}
         <PracticeText

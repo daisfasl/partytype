@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { generateMoreWords, generateText } from "../db/textGeneration.js";
+import {
+  generateMoreWords,
+  generateText,
+  getRandomQuoteWithSource,
+} from "../db/textGeneration.js";
 import type { PracticeSettings } from "../types.js";
 
 const INITIAL_TIME_CHUNK = 250;
@@ -8,16 +12,24 @@ const TIME_EXTEND_THRESHOLD = 250;
 
 export default function usePracticePrompt(settings: PracticeSettings) {
   const [prompt, setPrompt] = useState("");
+  const [quoteSource, setQuoteSource] = useState<string | null>(null);
 
   const fetchPrompt = useCallback(() => {
     if (settings.mode === "quote") {
-      setPrompt(generateText("quote", 0, settings.language));
+      const { text, source } = getRandomQuoteWithSource(
+        settings.language,
+        settings.quoteLength,
+      );
+      setPrompt(text);
+      setQuoteSource(source);
     } else if (settings.mode === "time") {
       setPrompt(generateText("time", INITIAL_TIME_CHUNK, settings.language));
+      setQuoteSource(null);
     } else {
       setPrompt(generateText("words", settings.numWords, settings.language));
+      setQuoteSource(null);
     }
-  }, [settings.mode, settings.numWords, settings.language]);
+  }, [settings.mode, settings.numWords, settings.language, settings.quoteLength]);
 
   useEffect(() => {
     fetchPrompt();
@@ -38,5 +50,5 @@ export default function usePracticePrompt(settings: PracticeSettings) {
     [settings.mode, settings.language],
   );
 
-  return { prompt, fetchPrompt, extendIfNeeded };
+  return { prompt, quoteSource, fetchPrompt, extendIfNeeded };
 }
