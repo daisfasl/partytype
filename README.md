@@ -3,6 +3,16 @@
 A terminal typing game, typeracer-style: solo practice plus multiplayer
 "party" races against friends, played entirely in the terminal.
 
+## Features
+
+- **Solo practice** — `words`, `time`, and `quote` modes, a choice of word
+  list/language, and quote length filtering, fully offline against bundled
+  content.
+- **Multiplayer party races** — create or join a room by code, race friends
+  against a shared text in real time, live opponent progress.
+- **Local stats** — personal bests per mode/setting and race history,
+  tracked on-device.
+
 ## Repo layout
 
 - `tui/` — the active client. Ink (React for terminals) + TypeScript, run on
@@ -11,26 +21,30 @@ A terminal typing game, typeracer-style: solo practice plus multiplayer
   content loaded straight from disk.
 - `backend/` — FastAPI server. A stateless in-memory relay/coordinator for
   multiplayer room state — no database, no persistence. Race text is
-  generated client-side by the host and relayed as-is.
-- `frontend/` — a Vite web-React client. Deprecated, superseded by `tui/`.
+  generated client-side by the host and relayed as-is. Deployed using AWS EC2; 
+  the TUI points there by default.
 
-See `ROADMAP.md` and `CLAUDE.md` for the implementation plan and locked
-design decisions.
 
-## Dev commands
+## Getting started
 
-**TUI** (`tui/`, run with Bun):
+Requires [Bun](https://bun.sh).
+
 ```
-bun run dev        # bun --watch src/cli.tsx
-bun run start      # bun run src/cli.tsx
-bun run typecheck  # tsc --noEmit
+cd tui
+bun install
+bun run start
 ```
 
-**Backend** (`backend/`, run from `backend/` with a venv active):
-```
-uvicorn app.main:app --reload
-pytest
-```
+Solo practice works completely offline. Multiplayer connects to
+the hosted backend automatically; override the target backend by editing
+`~/.config/terminaltype/config.json` (e.g. to point at a local backend for
+development).
+
+Alternatively, run the backend + a local Caddy reverse proxy together via
+`docker compose up` from the repo root (see `Caddyfile`/`docker-compose.yml`;
+defaults to serving `localhost` with no real domain needed).
+
+A `brew install` release isn't published yet — coming later.
 
 ## License
 
