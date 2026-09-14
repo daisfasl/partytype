@@ -13,6 +13,7 @@ import { PracticeSettings, Screen } from "./types.js";
 import useApi from "./hooks/useApiStatus.js";
 import useParty from "./hooks/useParty.js";
 import useTerminalSize from "./hooks/useTerminalSize.js";
+import { getHealthUrl } from "./config.js";
 
 export default function App() {
   const { columns, rows } = useTerminalSize();
@@ -35,7 +36,7 @@ export default function App() {
   });
   const healthRequest = useCallback(
     () =>
-      fetch("http://localhost:8000/api/health").then((response) => {
+      fetch(getHealthUrl()).then((response) => {
         if (!response.ok)
           throw new Error(`API health check failed (${response.status})`);
         return response.json();

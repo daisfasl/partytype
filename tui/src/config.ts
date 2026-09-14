@@ -12,9 +12,8 @@ type Config = {
 
 const defaultConfig: Config = {
   displayName: "",
-  // No hosted backend yet (see ROADMAP.md Phase F) - point at a local
-  // dev server by default. Override by editing the config file directly.
-  backendUrl: "ws://localhost:8000",
+  // where backend is hosted:
+  backendUrl: "wss://terminaltype.duckdns.org",
 };
 
 function readConfig(): Config {
@@ -46,4 +45,8 @@ export function getBackendUrl(): string {
 
 export function setBackendUrl(url: string) {
   writeConfig({ ...readConfig(), backendUrl: url });
+}
+
+export function getHealthUrl(): string {
+  return getBackendUrl().replace(/^ws/, "http") + "/api/health";
 }
